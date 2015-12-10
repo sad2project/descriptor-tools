@@ -26,7 +26,12 @@ class DescriptorDecorator:
         self.desc = desc
 
     def __get__(self, instance, owner):
-        return self.desc.__get__(instance, owner)
+        result = self.desc.__get__(instance, owner)
+        if result is self.desc:
+            return self
+        elif isinstance(result, UnboundAttribute):
+            result.descriptor = self
+        return result
 
     def __set__(self, instance, value):
         self.desc.__set__(instance, value)
@@ -40,7 +45,7 @@ class Binding(DescriptorDecorator):
         if instance is None:
             return UnboundAttribute(self, owner)
         else:
-            super().__get__(instance, owner)
+            return super().__get__(instance, owner)
 
 
 class ForcedSet(DescriptorDecorator):
@@ -69,10 +74,6 @@ def ClassWithDescriptor(descriptor):
     class Class:
         attr = descriptor
     return Class()
-
-
-class ClassWithOutDescriptor:
-    pass
 
 
 attrname = 'attr'

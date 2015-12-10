@@ -1,49 +1,47 @@
 from unittest import TestCase
-import tests.descriptor_tools.test_mocks as helpers
+import tests.descriptor_tools.test_mocks as mocks
 from descriptor_tools.find_descriptors import *
 
-
+attrname = mocks.attrname
 class Get_Descriptor_Test(TestCase):
 
     def test_with_normal_descriptor_unspecified(self):
-        instance = helpers.ClassWithDescriptor()
+        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
 
-        result = get_descriptor(type(instance), "attr")
+        result = get_descriptor(type(instance), attrname)
 
-        self.assertIsInstance(result, helpers.Descriptor)
+        self.assertIsInstance(result, mocks.Descriptor)
 
     def test_with_binding_descriptor_unspecified(self):
-        instance = helpers.ClassWithBindingDescriptor()
+        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
 
-        result = get_descriptor(type(instance), "attr")
+        result = get_descriptor(type(instance), attrname)
 
-        self.assertIsInstance(result, helpers.BindingDescriptor)
+        self.assertIsInstance(result, mocks.Binding)
 
     def test_with_normal_descriptor_specified(self):
-        instance = helpers.ClassWithDescriptor()
+        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
 
-        result = get_descriptor(type(instance), "attr", binding=False)
+        result = get_descriptor(type(instance), attrname, binding=False)
 
-        self.assertIsInstance(result, helpers.Descriptor)
+        self.assertIsInstance(result, mocks.Descriptor)
 
     def test_with_binding_descriptor_specified(self):
-        instance = helpers.ClassWithBindingDescriptor()
+        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
 
-        result = get_descriptor(type(instance), "attr", binding=True)
+        result = get_descriptor(type(instance), attrname, binding=True)
 
-        self.assertIsInstance(result, helpers.BindingDescriptor)
+        self.assertIsInstance(result, mocks.Binding)
 
     def test_with_normal_descriptor_incorrectly_specified(self):
-        instance = helpers.ClassWithDescriptor()
+        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
 
         with self.assertRaises(AttributeError):
-            get_descriptor(type(instance), "attr", binding=True)
+            get_descriptor(type(instance), attrname, binding=True)
 
     def test_with_binding_descriptor_incorrectly_specified(self):
-        instance = helpers.ClassWithBindingDescriptor()
+        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
 
-        result = get_descriptor(type(instance), "attr", binding=False)
+        result = get_descriptor(type(instance), attrname, binding=False)
 
-        self.assertIsInstance(result, helpers.UnboundAttribute)
-
-
+        self.assertIsInstance(result, mocks.UnboundAttribute)

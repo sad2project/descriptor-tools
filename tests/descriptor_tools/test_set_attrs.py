@@ -107,7 +107,9 @@ attrname = mocks.attrname
 class Setters_Test(TestCase):
 
     def test_attr_setting_with_attr(self):
-        instance = mocks.ClassWithOutDescriptor()
+        class ClassWithoutDescriptor:
+            pass
+        instance = ClassWithoutDescriptor()
 
         Setters.attr(instance, attrname, 0)
 
@@ -140,3 +142,30 @@ class Setters_Test(TestCase):
         Setters.secret(instance, attrname, 0, binding=False)
 
         self.assertEqual(getattr(instance, attrname), 0)
+
+    def test_basic_setting_with_binding_descriptor(self):
+        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
+
+        Setters.basic(instance, attrname, 0, binding=True)
+
+        self.assertEqual(getattr(instance, attrname), 0)
+
+    def test_forced_setting_with_binding_descriptor(self):
+        instance = mocks.ClassWithDescriptor(mocks.ForcedSet(mocks.Binding(
+                mocks.Descriptor())))
+
+        Setters.forced(instance, attrname, 0, binding=True)
+
+        self.assertEqual(getattr(instance, attrname), 0)
+
+    def test_secret_setting_with_binding_descriptor(self):
+        instance = mocks.ClassWithDescriptor(mocks.SecretSet(mocks.Binding(
+                mocks.Descriptor())))
+
+        Setters.secret(instance, attrname, 0, binding=True)
+
+        self.assertEqual(getattr(instance, attrname), 0)
+
+
+class SetAttribute_Test(TestCase):
+    pass  # TODO continue
