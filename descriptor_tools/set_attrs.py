@@ -1,5 +1,5 @@
 import functools
-from .find_descriptors import get_descriptor_from
+from . import get_descriptor_from
 
 
 # --------------------------------

@@ -59,37 +59,6 @@ class Set_On_Test(TestCase):
         self.assertEqual(instance.__dict__[attr], value)
 
 
-class Get_Descriptor_From_Test(TestCase):
-
-    def test_with_normal_descriptor_unspecified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
-
-        result = get_descriptor_from(instance, "attr")
-
-        self.assertIsInstance(result, mocks.Descriptor)
-
-    def test_with_binding_descriptor_unspecified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
-
-        result = get_descriptor_from(instance, "attr")
-
-        self.assertIsInstance(result, mocks.Binding)
-
-    def test_with_normal_descriptor_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
-
-        result = get_descriptor_from(instance, "attr", binding=False)
-
-        self.assertIsInstance(result, mocks.Descriptor)
-
-    def test_with_binding_descriptor_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
-
-        result = get_descriptor_from(instance, "attr", binding=True)
-
-        self.assertIsInstance(result, mocks.Binding)
-
-
 attrname = mocks.attrname
 class Setters_Test(TestCase):
 
@@ -140,3 +109,7 @@ class Setters_Test(TestCase):
 
 class SetAttribute_Test(TestCase):
     pass  # TODO continue
+
+
+class AttributeSetter_Test(TestCase):
+    pass  # TODO
