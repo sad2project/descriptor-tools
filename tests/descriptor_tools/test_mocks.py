@@ -20,8 +20,11 @@ class UnboundAttribute:
     def __call__(self, instance):
         return self.descriptor.__get__(instance, self.owner)
 
+    def __getattr__(self, item):
+        return getattr(self.descriptor, item)
 
-class DescriptorDecorator:
+
+class DescriptorDecorator: # split into two, giving both a __getattr_ that redirects to desc
     def __init__(self, desc):
         self.desc = desc
 
@@ -46,6 +49,17 @@ class Binding(DescriptorDecorator):
             return UnboundAttribute(self, owner)
         else:
             return super().__get__(instance, owner)
+
+
+# class NonBinding(DescriptorDecorator):
+#     def __init__(self, desc):
+#         super().__init__(desc)
+#
+#     def __get__(self, instance, owner):
+#         if instance is None:
+#             return self
+#         else:
+#             return super().__get__(instance, owner)
 
 
 class ForcedSet(DescriptorDecorator):

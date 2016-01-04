@@ -89,64 +89,35 @@ class Get_Descriptor_From_Test(TestCase):
 
         self.assertIsInstance(result, mocks.Binding)
 
-    def test_with_normal_descriptor_incorrectly_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
-
-        with self.assertRaises(AttributeError):
-            get_descriptor_from(instance, "attr", binding=True)
-
-    def test_with_binding_descriptor_incorrectly_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
-
-        result = get_descriptor_from(instance, "attr", binding=False)
-
-        self.assertIsInstance(result, mocks.UnboundAttribute)
-
 
 attrname = mocks.attrname
 class Setters_Test(TestCase):
 
-    def test_attr_setting_with_attr(self):
-        class ClassWithoutDescriptor:
-            pass
-        instance = ClassWithoutDescriptor()
-
-        Setters.attr(instance, attrname, 0)
-
-        self.assertEqual(getattr(instance, attrname), 0)
-
-    def test_attr_setting_with_descriptor(self):
-        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
-
-        Setters.attr(instance, attrname, 0)
-
-        self.assertEqual(getattr(instance, attrname), 0)
-
     def test_basic_setting(self):
         instance = mocks.ClassWithDescriptor(mocks.Descriptor())
 
-        Setters.basic(instance, attrname, 0, binding=False)
+        Setter.basic(instance, attrname, 0, binding=False)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_forced_setting(self):
         instance = mocks.ClassWithDescriptor(mocks.ForcedSet(mocks.Descriptor()))
 
-        Setters.forced(instance, attrname, 0, binding=False)
+        Setter.forced(instance, attrname, 0, binding=False)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_secret_setting(self):
         instance = mocks.ClassWithDescriptor(mocks.SecretSet(mocks.Descriptor()))
 
-        Setters.secret(instance, attrname, 0, binding=False)
+        Setter.secret(instance, attrname, 0, binding=False)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_basic_setting_with_binding_descriptor(self):
         instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
 
-        Setters.basic(instance, attrname, 0, binding=True)
+        Setter.basic(instance, attrname, 0, binding=True)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
@@ -154,7 +125,7 @@ class Setters_Test(TestCase):
         instance = mocks.ClassWithDescriptor(mocks.ForcedSet(mocks.Binding(
                 mocks.Descriptor())))
 
-        Setters.forced(instance, attrname, 0, binding=True)
+        Setter.forced(instance, attrname, 0, binding=True)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
@@ -162,7 +133,7 @@ class Setters_Test(TestCase):
         instance = mocks.ClassWithDescriptor(mocks.SecretSet(mocks.Binding(
                 mocks.Descriptor())))
 
-        Setters.secret(instance, attrname, 0, binding=True)
+        Setter.secret(instance, attrname, 0, binding=True)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
