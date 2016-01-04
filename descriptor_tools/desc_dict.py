@@ -14,17 +14,16 @@ def id2key(id):
 
 class DescDict(MutableMapping):
     """
-    WeakUnhashableKeyDictionary is a specialized dictionary for descriptors to
-    store their instance attributes on themselves, though is not limited to
-    that.
+    DescDict is a specialized dictionary for descriptors to store their instance
+    attributes on themselves, though is not limited to that.
 
-    WeakUnhashableKeyDictionary is just like WeakKeyDictionary, except that it
-    does not require the key to be hashable.
+    DescDict is just like WeakKeyDictionary, except that it does not require the
+    key to be hashable.
 
-    Despite not hashing the instance, WeakUnhashableKeyDictionary is still very
-    efficient because it hashes the id of the instance to store it in a typical
-    `dict`. Also, a weak reference finalizer is set up to remove the item from
-    the dictionary when it is cleaned up.
+    Despite not hashing the instance, DescDict is still very efficient because
+    it hashes the id of the instance to store it in a typical `dict`. Also, a
+    weak reference finalizer is set up to remove the item from the dictionary
+    when it is cleaned up.
 
     Methods that are implemented via `MutableMapping` Mixins:
     + `keys()`
