@@ -60,6 +60,8 @@ class Set_On_Test(TestCase):
 
 
 attrname = mocks.attrname
+
+
 class Setters_Test(TestCase):
 
     def test_basic_setting(self):

@@ -1,3 +1,6 @@
+from descriptor_tools import UnboundAttribute
+
+
 class Descriptor:
     def __init__(self):
         self.storage = {}
@@ -10,18 +13,6 @@ class Descriptor:
 
     def __set__(self, instance, value):
         self.storage[instance] = value
-
-
-class UnboundAttribute:
-    def __init__(self, descriptor,owner):
-        self.descriptor = descriptor
-        self.owner = owner
-
-    def __call__(self, instance):
-        return self.descriptor.__get__(instance, self.owner)
-
-    def __getattr__(self, item):
-        return getattr(self.descriptor, item)
 
 
 class DescriptorDecorator: # split into two, giving both a __getattr_ that redirects to desc
