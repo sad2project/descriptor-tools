@@ -2,7 +2,7 @@ import sys
 import inspect
 
 
-__all__ = ['get_descriptor', 'get_descriptor_from']
+__all__ = ['get_descriptor', 'get_descriptor_from', 'name_of']
 
 
 major, minor, _, __, ___ = sys.version_info
@@ -58,3 +58,10 @@ def _unknown_binding_descriptor(cls, descname):
     return attr
 
 
+def name_of(descriptor, owner):
+    return _first(attr for attr in dir(owner)
+                  if (getattr(owner, attr) is descriptor))
+
+
+def _first(iter):
+    return next(iter, None)

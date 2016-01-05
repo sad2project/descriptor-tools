@@ -2,6 +2,9 @@ from descriptor_tools.unboundattr import UnboundAttribute
 from functools import wraps
 
 
+# ******************************************************
+# Instance decorators (old-fashioned Design Pattern Way)
+# ******************************************************
 class GetDescriptorDecorator:
     def __init__(self, desc):
         self.desc = desc
@@ -11,7 +14,7 @@ class GetDescriptorDecorator:
         if result is self.desc:
             return self
         elif isinstance(result, UnboundAttribute):
-            result.descriptor = self
+            return result.lift_descriptor(self)
         return result
 
 
@@ -23,6 +26,25 @@ class SetDescriptorDecorator:
         self.desc.__set__(instance, value)
 
 
+class Binding(GetDescriptorDecorator):
+    pass  # TODO - the decorator kind
+
+
+class SecretSet(SetDescriptorDecorator):
+    pass
+
+
+class ForcedSet(SetDescriptorDecorator):
+    pass
+
+
+class SetOnce(SetDescriptorDecorator):
+    pass
+
+
+# *****************
+# Method decorators
+# *****************
 def binding(get):
     @wraps(get)
     def __get__(desc, instance, owner):
@@ -31,7 +53,3 @@ def binding(get):
         else:
             return get(desc, instance, owner)
     return __get__
-
-
-class Binding(GetDescriptorDecorator):
-    pass  # TODO - the decorator kind

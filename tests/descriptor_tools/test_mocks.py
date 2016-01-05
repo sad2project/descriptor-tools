@@ -24,7 +24,7 @@ class DescriptorDecorator: # split into two, giving both a __getattr_ that redir
         if result is self.desc:
             return self
         elif isinstance(result, UnboundAttribute):
-            result.descriptor = self
+            return result.lift_descriptor(self)
         return result
 
     def __set__(self, instance, value):
