@@ -5,7 +5,7 @@ from functools import wraps
 # ******************************************************
 # Instance decorators (old-fashioned Design Pattern Way)
 # ******************************************************
-class GetDescriptorDecorator:
+class GetDescDecorator:
     def __init__(self, desc):
         self.desc = desc
 
@@ -17,6 +17,9 @@ class GetDescriptorDecorator:
             return result.lift_descriptor(self)
         return result
 
+    def __getattr__(self, item):
+        return getattr(self.desc, item)
+
 
 class SetDescriptorDecorator:
     def __init__(self, desc):
@@ -26,7 +29,7 @@ class SetDescriptorDecorator:
         self.desc.__set__(instance, value)
 
 
-class Binding(GetDescriptorDecorator):
+class Binding(GetDescDecorator):
     pass  # TODO - the decorator kind
 
 
