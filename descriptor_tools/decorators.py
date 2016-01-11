@@ -1,47 +1,73 @@
-from descriptor_tools.unboundattr import UnboundAttribute
+from descriptor_tools import UnboundAttribute, name_of
 from functools import wraps
 
 
 # ******************************************************
 # Instance decorators (old-fashioned Design Pattern Way)
 # ******************************************************
-class GetDescDecorator:
+class DescriptorDecorator:
     def __init__(self, desc):
         self.desc = desc
 
     def __get__(self, instance, owner):
-        result = self.desc.__get__(instance, owner)
-        if result is self.desc:
-            return self
-        elif isinstance(result, UnboundAttribute):
-            return result.lift_descriptor(self)
-        return result
+        if not is_data_desc(self.desc):
+            try:
+                return instance.__dict__[name_of(self, owner)]
+            except KeyError:
+                pass
+
+        if hasattr(self.desc, '__get__'):
+            return lifted_desc_results(self.desc, self, instance, owner)
+        else:
+            return instance.__dict__[name_of(self, owner)]
+
+    def __set__(self, instance, value):
+        if hasattr(self.desc, '__set__'):  # delegate if __set__ exists
+            self.desc.__set__(instance, value)
+        elif is_data_desc(self.desc):  # bad call if it's a data descriptor without __set__
+            raise AttributeError('__set__')
+        else:  # delegate to instance dictionary
+            instance.__dict__[name_of(self, type(instance))] = value
+
+    def __delete__(self, instance):
+        if hasattr(self.desc, '__delete__'):
+            self.desc.__delete__(instance)
+        elif is_data_desc(self.desc):
+            raise AttributeError('__delete__')
+        else:
+            del instance.__dict__[name_of(self, type(instance))]
 
     def __getattr__(self, item):
         return getattr(self.desc, item)
 
 
-class SetDescriptorDecorator:
-    def __init__(self, desc):
-        self.desc = desc
-
-    def __set__(self, instance, value):
-        self.desc.__set__(instance, value)
-
-
-class Binding(GetDescDecorator):
-    pass  # TODO - the decorator kind
+def lifted_desc_results(wrapped, wrapper, instance, owner):
+    result = wrapped.__get__(instance, owner)
+    if result is wrapped:
+        return wrapper
+    elif isinstance(result, UnboundAttribute):
+        return result.lift_descriptor(wrapper)
+    else:
+        return result
 
 
-class SecretSet(SetDescriptorDecorator):
+def is_data_desc(desc):
+    return hasattr(desc, '__set__') or hasattr(desc, '__delete__')
+
+
+class Binding(DescriptorDecorator):
     pass
 
 
-class ForcedSet(SetDescriptorDecorator):
+class SecretSet(DescriptorDecorator):
     pass
 
 
-class SetOnce(SetDescriptorDecorator):
+class ForcedSet(DescriptorDecorator):
+    pass
+
+
+class SetOnce(DescriptorDecorator):
     pass
 
 

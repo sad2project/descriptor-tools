@@ -15,7 +15,7 @@ class Descriptor:
         self.storage[instance] = value
 
 
-class DescriptorDecorator: # split into two, giving both a __getattr_ that redirects to desc
+class DescriptorDecorator:  # split into two, giving both a __getattr_ that redirects to desc
     def __init__(self, desc):
         self.desc = desc
 
