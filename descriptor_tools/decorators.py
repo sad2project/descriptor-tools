@@ -1,4 +1,4 @@
-from descriptor_tools import UnboundAttribute, name_of
+from . import UnboundAttribute, name_of
 from functools import wraps
 
 
@@ -10,32 +10,36 @@ class DescriptorDecorator:
         self.desc = desc
 
     def __get__(self, instance, owner):
-        if not is_data_desc(self.desc):
-            try:
+        if not is_data_desc(self.desc):  # attempt instance lookup before using
+            try:                         # descriptor if non-data descriptor
                 return instance.__dict__[name_of(self, owner)]
             except KeyError:
                 pass
 
-        if hasattr(self.desc, '__get__'):
+        if hasattr(self.desc, '__get__'):  # delegate if __get__ exists
             return lifted_desc_results(self.desc, self, instance, owner)
-        else:
-            return instance.__dict__[name_of(self, owner)]
+        else:  # last ditch effort: self is all that's left under that name
+            return self
 
     def __set__(self, instance, value):
-        if hasattr(self.desc, '__set__'):  # delegate if __set__ exists
-            self.desc.__set__(instance, value)
-        elif is_data_desc(self.desc):  # bad call if it's a data descriptor without __set__
-            raise AttributeError('__set__')
+        if is_data_desc(self.desc):
+            if hasattr(self.desc, '__set__'):  # delegate if __set__ exists
+                self.desc.__set__(instance, value)
+            else:  # bad call if it's a data descriptor without __set__
+                raise AttributeError('__set__')
         else:  # delegate to instance dictionary
-            instance.__dict__[name_of(self, type(instance))] = value
+            name = name_of(self, type(instance))
+            instance.__dict__[name] = value
 
     def __delete__(self, instance):
-        if hasattr(self.desc, '__delete__'):
-            self.desc.__delete__(instance)
-        elif is_data_desc(self.desc):
-            raise AttributeError('__delete__')
-        else:
-            del instance.__dict__[name_of(self, type(instance))]
+        if is_data_desc(self.desc):
+            if hasattr(self.desc, '__delete__'):  # delegate if __delete__ exists
+                self.desc.__delete__(instance)
+            else:  # bad call if it's a data descriptor without __delete__
+                raise AttributeError('__delete__')
+        else:  # delegate to instance dictionary
+            name = name_of(self, type(instance))
+            del instance.__dict__[name]
 
     def __getattr__(self, item):
         return getattr(self.desc, item)
