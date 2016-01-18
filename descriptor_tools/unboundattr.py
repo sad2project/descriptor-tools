@@ -19,6 +19,9 @@ class UnboundAttribute:
     def set(self, instance, value):
         self.descriptor.__set__(instance, value)
 
+    def delete(self, instance):
+        self.descriptor.__delete__(instance)
+
     def lift_descriptor(self, descriptor):
         return UnboundAttribute(descriptor, self.owner)
 

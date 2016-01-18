@@ -48,6 +48,24 @@ class DescDict_ItemUse_Test(TestCase):
 
         self.assertFalse(self.key in self.dict)
 
+    def test_retrieving_nonexistant_AttributeError(self):
+        """
+        Checks that it raises an AttributeError instead of a KeyError because
+        this is designed for use within descriptors. It keeps the descriptors
+        from having to turn the KeyErrors into AttributeErros.
+        """
+        with self.assertRaises(AttributeError):
+            x = self.dict[self.key]
+
+    def test_deleting_nonexistant_AttributeError(self):
+        """
+        Checks that it raises an AttributeError instead of a KeyError because
+        this is designed for use within descriptors. It keeps the descriptors
+        from having to turn the KeyErrors into AttributeErros.
+        """
+        with self.assertRaises(AttributeError):
+            del self.dict[self.key]
+
 
 class Key:
     def __init__(self, value):

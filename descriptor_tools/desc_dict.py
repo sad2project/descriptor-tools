@@ -57,7 +57,10 @@ class DescDict(MutableMapping):
         :param key: the key to lookup up the item by
         :return: the item associated with the key
         """
-        return self.storage[id(key)][0]
+        try:
+            return self.storage[id(key)][0]
+        except KeyError as e:
+            raise AttributeError(e)
 
     def __setitem__(self, key, value):
         """
@@ -85,8 +88,11 @@ class DescDict(MutableMapping):
         Remove `d[key]` from *d*. Raises a `KeyError` if *key* is not in the map
         :param key: the key to remove from the map (along with its associated value)
         """
-        self.storage[id(key)][1].detach()
-        del self.storage[id(key)]
+        try:
+            self.storage[id(key)][1].detach()
+            del self.storage[id(key)]
+        except KeyError as e:
+            raise AttributeError(e)
 
     def __iter__(self):
         """

@@ -1,5 +1,14 @@
 from descriptor_tools import UnboundAttribute, name_of
+from weakref import WeakSet
 from functools import wraps
+
+
+__all__ = ["DescriptorDecorator",
+           "Binding",
+           "binding",
+           "ForcedSet",
+           "SecretSet",
+           "SetOnce"]
 
 
 # ******************************************************
@@ -10,16 +19,22 @@ class DescriptorDecorator:
         self.desc = desc
 
     def __get__(self, instance, owner):
-        if not is_data_desc(self.desc):
-            try:
-                return instance.__dict__[name_of(self, owner)]
-            except KeyError:
-                pass
-
-        if hasattr(self.desc, '__get__'):
-            return lifted_desc_results(self.desc, self, instance, owner)
+        if instance is None:
+            if hasattr(self.desc, '__get__'):
+                return lifted_desc_results(self.desc, self, instance, owner)
+            else:
+                return self
         else:
-            return instance.__dict__[name_of(self, owner)]
+            if is_data_desc(self.desc):
+                if hasattr(self.desc, '__get__'):
+                    return lifted_desc_results(self.desc, self, instance, owner)
+            if name_of(self, owner) in instance.__dict__:
+                return instance.__dict__[name_of(self, owner)]
+            elif hasattr(self.desc, '__get__'):
+                return lifted_desc_results(self.desc, self, instance, owner)
+            else:
+                return self
+
 
     def __set__(self, instance, value):
         if hasattr(self.desc, '__set__'):  # delegate if __set__ exists
@@ -35,7 +50,10 @@ class DescriptorDecorator:
         elif is_data_desc(self.desc):
             raise AttributeError('__delete__')
         else:
-            del instance.__dict__[name_of(self, type(instance))]
+            try:
+                del instance.__dict__[name_of(self, type(instance))]
+            except KeyError as e:
+                raise AttributeError(e)
 
     def __getattr__(self, item):
         return getattr(self.desc, item)
@@ -56,19 +74,43 @@ def is_data_desc(desc):
 
 
 class Binding(DescriptorDecorator):
-    pass
+    def __get__(self, instance, owner):
+        if instance is None:
+            return UnboundAttribute(self, owner)
+        else:
+            return super().__get__(instance, owner)
 
 
 class SecretSet(DescriptorDecorator):
-    pass
+    def __set__(self, instance, value):
+        raise AttributeError("Cannot set a read-only attribute")
+
+    def set(self, instance, value):
+        super().__set__(instance, value)
 
 
 class ForcedSet(DescriptorDecorator):
-    pass
+    def __set__(self, instance, value, forced=False):
+        if forced:
+            super().__set__(instance, value)
+        else:
+            raise AttributeError("Cannot set a read-only attribute")
 
 
 class SetOnce(DescriptorDecorator):
-    pass
+    def __init__(self, desc):
+        super().__init__(desc)
+        self.set_instances = WeakSet()
+
+    def __set__(self, instance, value):
+        if self._already_set(instance):
+            raise AttributeError("Cannot set a read-only attribute")
+        else:
+            self.set_instances.add(instance)
+            super().__set__(instance, value)
+
+    def _already_set(self, instance):
+        return instance in self.set_instances
 
 
 # *****************

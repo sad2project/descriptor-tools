@@ -32,6 +32,14 @@ class UnboundAttr_Test(TestCase):
 
         self.assertEqual(instance.descAttr, 5)
 
+    def test_deleter(self):
+        instance = Class()
+        instance.descAttr = 5
+
+        self.unboundattr.delete(instance)
+
+        self.assertFalse(hasattr(instance, "descAttr"))
+
 class UnboundAttr_LiftDescriptor_Test(TestCase):
     def setUp(self):
         unboundattr = UnboundAttribute(Class.descAttr, Class)
