@@ -8,6 +8,14 @@ from descriptor_tools.unboundattr import UnboundAttribute
 
 # does not automatically export the decorators or mixins modules
 
-__all__ = ['DescDict', 'get_descriptor_from', 'get_descriptor', 'setattribute',
-           'mangle_name', 'NameMangler', 'set_on', 'AttributeSetter', 'Setter',
-           'UnboundAttribute', 'name_of']
+__all__ = ['AttributeSetter',
+           'DescDict',
+           'get_descriptor',
+           'get_descriptor_from',
+           'mangle_name',
+           'name_of',
+           'NameMangler',
+           'set_on',
+           'setattribute',
+           'Setter',
+           'UnboundAttribute']

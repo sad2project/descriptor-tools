@@ -1,4 +1,5 @@
-from descriptor_tools import UnboundAttribute, name_of
+
+from . import UnboundAttribute, name_of
 from weakref import WeakSet
 from functools import wraps
 
@@ -35,14 +36,15 @@ class DescriptorDecorator:
             else:
                 return self
 
-
     def __set__(self, instance, value):
-        if hasattr(self.desc, '__set__'):  # delegate if __set__ exists
-            self.desc.__set__(instance, value)
-        elif is_data_desc(self.desc):  # bad call if it's a data descriptor without __set__
-            raise AttributeError('__set__')
+        if is_data_desc(self.desc):
+            if hasattr(self.desc, '__set__'):  # delegate if __set__ exists
+                self.desc.__set__(instance, value)
+            else:  # bad call if it's a data descriptor without __set__
+                raise AttributeError('__set__')
         else:  # delegate to instance dictionary
-            instance.__dict__[name_of(self, type(instance))] = value
+            name = name_of(self, type(instance))
+            instance.__dict__[name] = value
 
     def __delete__(self, instance):
         if hasattr(self.desc, '__delete__'):
