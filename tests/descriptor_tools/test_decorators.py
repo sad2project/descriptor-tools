@@ -264,12 +264,12 @@ class ForcedSet_Test(TestCase):
             self.instance.attr = 5
 
     def test_forced_call_works(self):
-        self.decor.__set__(self.instance, 5, forced=True)
+        self.decor.__set__(self.instance, 5, force=True)
 
         self.assertEqual(self.instance.attr, 5)
 
     def test_other_call_version(self):
-        self.Class.attr.__set__(self.instance, 5, forced=True)
+        self.Class.attr.__set__(self.instance, 5, force=True)
 
         self.assertEqual(self.instance.attr, 5)
 

@@ -6,63 +6,59 @@ attrname = mocks.attrname
 
 
 class Get_Descriptor_Test(TestCase):
-    def test_with_normal_descriptor_unspecified(self):
+    def test_with_normal_descriptor(self):
         instance = mocks.ClassWithDescriptor(mocks.Descriptor())
 
         result = get_descriptor(type(instance), attrname)
 
-        self.assertIsInstance(result, mocks.Descriptor)
+        self.assertIs(result, type(instance).__dict__[attrname])
 
-    def test_with_binding_descriptor_unspecified(self):
+    def test_with_binding_descriptor(self):
         instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
 
         result = get_descriptor(type(instance), attrname)
 
-        self.assertIsInstance(result, mocks.Binding)
+        self.assertIs(result, type(instance).__dict__[attrname])
 
-    def test_with_normal_descriptor_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
+    def test_with_superclass(self):
+        class Class:
+            attr = mocks.Descriptor()
+        class SubClass(Class):
+            pass
 
-        result = get_descriptor(type(instance), attrname, binding=False)
+        instance = SubClass()
 
-        self.assertIsInstance(result, mocks.Descriptor)
+        result = get_descriptor(SubClass, 'attr')
 
-    def test_with_binding_descriptor_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
-
-        result = get_descriptor(type(instance), attrname, binding=True)
-
-        self.assertIsInstance(result, mocks.Binding)
+        self.assertIs(result, Class.__dict__['attr'])
 
 
 class Get_Descriptor_From_Test(TestCase):
-    def test_with_normal_descriptor_unspecified(self):
+    def test_with_normal_descriptor(self):
         instance = mocks.ClassWithDescriptor(mocks.Descriptor())
 
         result = get_descriptor_from(instance, attrname)
 
-        self.assertIsInstance(result, mocks.Descriptor)
+        self.assertIs(result, type(instance).__dict__[attrname])
 
-    def test_with_binding_descriptor_unspecified(self):
+    def test_with_binding_descriptor(self):
         instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
 
         result = get_descriptor_from(instance, attrname)
 
-        self.assertIsInstance(result, mocks.Binding)
+        self.assertIs(result, type(instance).__dict__[attrname])
 
-    def test_with_normal_descriptor_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Descriptor())
+    def test_with_superclass(self):
+        class Class:
+            attr = mocks.Descriptor()
+        class SubClass(Class):
+            pass
 
-        result = get_descriptor_from(instance, attrname, binding=False)
+        instance = SubClass()
 
-        self.assertIsInstance(result, mocks.Descriptor)
+        result = get_descriptor_from(instance, 'attr')
 
-    def test_with_binding_descriptor_specified(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
-
-        result = get_descriptor_from(instance, attrname, binding=True)
-
-        self.assertIsInstance(result, mocks.Binding)
+        self.assertIs(result, Class.__dict__['attr'])
 
 
 class Class:

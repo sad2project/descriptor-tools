@@ -62,20 +62,18 @@ class Setter:
         setattr(instance, attrname, value)
 
     @staticmethod
-    def forced(instance, attrname, value, *, binding=None, **_):
+    def forced(instance, attrname, value, **_):
         """
         Sets the value for the instance on a forced-set descriptor attribute
         :param instance: instance to store the value on
         :param attrname: name of the attribute to store the value with
         :param value: value to store for the instance
-        :param binding: *optional* - whether or not the descriptor is a binding
-        descriptor. If unknown, leave blank
         """
-        desc = get_descriptor_from(instance, attrname, binding=binding)
+        desc = get_descriptor_from(instance, attrname)
         desc.__set__(instance, value, force=True)
 
     @staticmethod
-    def secret(instance, attrname, value, *, secret='set', binding=None, **_):
+    def secret(instance, attrname, value, *, secret='set', **_):
         """
         Sets the value for the instance on a secret-set descriptor attribute
         :param instance: instance to store the value on
@@ -83,10 +81,8 @@ class Setter:
         :param value: value to store for the instance
         :param secret: *optional* - defaults to 'set' - name of the secret set
         method on the descriptor
-        :param binding: *optional* - whether or not the descriptor is a binding
-        descriptor. If unknown, leave blank.
         """
-        desc = get_descriptor_from(instance, attrname, binding=binding)
+        desc = get_descriptor_from(instance, attrname)
         getattr(desc, secret)(instance, value)
 
 
@@ -104,12 +100,11 @@ def setattribute(
         fun(instance, attrname, value, **kwargs)
 
     It must be able to accept keyword arguments to handle the potential arguments
-    that will be passed to other potential setter functions. For example, most of
-    the functions on `Setter` take a *binding* argument, and `Setter.secret()`
-    takes a *secret* argument. If you provide a new setter function that takes
-    additional parameters, you must either provide it with default values or else
-    be certain to provide those arguments in the keyword arguments of calling
-    this function.
+    that will be passed to other potential setter functions. For example,
+    `Setter.secret()` takes a *secret* argument. If you provide a new setter
+    function that takes additional parameters, you must either provide it
+    with default values or else be certain to provide those arguments in the
+    keyword arguments of calling this function.
     :param instance: instance to store the value on
     :param attrname: name of the attribute to store the value with
     :param value: value to store for the instance
@@ -141,19 +136,19 @@ class AttributeSetter:
     For example:
 
         class Example:
-            attr1 = ForcedSetDescriptor()
-            attr2 = BindingDescriptor()
+            attr1 = SecretSetDescriptor()
+            attr2 = BasicDescriptor()
 
             def __init__(self, attr1, attr2):
                 self.setter = AttributeSetter(self)
 
-                setter.register('attr1', Setter.forced)
-                setter.register('attr2', Setter.basic, binding=True)
+                setter.register('attr1', Setter.secret, secret='set')
+                setter.register('attr2', Setter.basic)
 
                 # using set() to set the attribute
-                setter.set('attr1', attr1)
+                setter.set('attr1', value1)
                 # using attribute redirection
-                setter.attr2 = attr2
+                setter.attr2 = value2
 
     This simplifies complicated descriptor setting by making all attempts the
     same as well as clean.
@@ -177,7 +172,7 @@ class AttributeSetter:
         Register an attribute so this can set values on it
         :param attrname: name of the attribute to register
         :param setter: the function to call to set the value
-        :param kwargs: any keyword arguments to pass into *setter*
+        :param kwargs: any additional arguments to pass into *setter*
         """
         self.attributes[attrname] = (setter, kwargs)
 
@@ -189,8 +184,8 @@ class AttributeSetter:
         arguments.
         :param attrname: name of the attribute to store the value with
         :param value: value to store on the attribute
-        :param kwargs: *optional* - any potential keyword arguments to provide
-        to setters that are called
+        :param kwargs: *optional* - any additional arguments to provide to
+        setters that are called
         """
         if attrname in self.attributes:
             self._set_registered(attrname, value, **kwargs)
