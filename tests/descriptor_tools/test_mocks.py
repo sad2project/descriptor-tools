@@ -1,7 +1,8 @@
 from descriptor_tools import UnboundAttribute
 from descriptor_tools.decorators import (DescriptorDecorator,
                                          Binding,
-                                         SecretSet)
+                                         SecretSet,
+                                         ForcedSet)
 
 
 class _Getter:
@@ -71,17 +72,6 @@ class Descriptor:
 #             return self
 #         else:
 #             return super().__get__(instance, owner)
-
-
-class ForcedSet(DescriptorDecorator):
-    def __init__(self, desc):
-        super().__init__(desc)
-
-    def __set__(self, instance, value, force=False):
-        if force:
-            super().__set__(instance, value)
-        else:
-            raise AttributeError()
 
 def ClassWithDescriptor(descriptor):
     class Class:

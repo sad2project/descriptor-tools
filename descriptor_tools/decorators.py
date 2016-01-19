@@ -92,8 +92,8 @@ class SecretSet(DescriptorDecorator):
 
 
 class ForcedSet(DescriptorDecorator):
-    def __set__(self, instance, value, forced=False):
-        if forced:
+    def __set__(self, instance, value, force=False):
+        if force:
             super().__set__(instance, value)
         else:
             raise AttributeError("Cannot set a read-only attribute")
