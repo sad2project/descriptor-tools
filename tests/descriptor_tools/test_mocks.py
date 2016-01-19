@@ -63,16 +63,6 @@ class Descriptor:
         del self.storage[instance]
 
 
-# class NonBinding(DescriptorDecorator):
-#     def __init__(self, desc):
-#         super().__init__(desc)
-#
-#     def __get__(self, instance, owner):
-#         if instance is None:
-#             return self
-#         else:
-#             return super().__get__(instance, owner)
-
 def ClassWithDescriptor(descriptor):
     class Class:
         attr = descriptor
