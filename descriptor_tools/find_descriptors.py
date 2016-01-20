@@ -1,8 +1,7 @@
-import sys
 import inspect
+import sys
 
-
-__all__ = ['get_descriptor', 'get_descriptor_from', 'name_of']
+__all__ = ['get_descriptor', 'get_descriptor_from']
 
 
 major, minor, _, __, ___ = sys.version_info
@@ -45,21 +44,6 @@ def _find_descriptor(cls, descname):
     selected_class = _first(clss for clss in cls.__mro__
                             if descname in clss.__dict__)
     return selected_class.__dict__[descname]
-
-
-def name_of(descriptor, owner):
-    """
-    Given a descriptor and a class that the descriptor is stored on, returns
-    the name of the attribute the descriptor is stored under.
-    Also works if the given class is a subclass of the class that *actually*
-    has the descriptor attribute
-    :param descriptor: descriptor the name is being looked up for
-    :param owner: class that "owns" the descriptor
-    :return: the name the descriptor is stored under on *owner*
-    """
-    return _first(attr for attr in dir(owner)
-                  if (get_descriptor(owner, attr) is descriptor))
-
 
 def _first(iter):
     return next(iter, None)

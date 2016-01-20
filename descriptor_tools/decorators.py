@@ -1,5 +1,6 @@
 
-from . import UnboundAttribute, name_of
+from . import UnboundAttribute
+from descriptor_tools import name_of
 from weakref import WeakSet
 from functools import wraps
 

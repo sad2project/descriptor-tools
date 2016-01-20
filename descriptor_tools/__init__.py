@@ -1,6 +1,7 @@
 from descriptor_tools.desc_dict import DescDict
-from descriptor_tools.find_descriptors import (get_descriptor_from, name_of,
+from descriptor_tools.find_descriptors import (get_descriptor_from,
                                                get_descriptor)
+from descriptor_tools.names import name_of, id_name_of
 from descriptor_tools.set_attrs import (AttributeSetter, mangle_name,
                                         NameMangler, set_on, setattribute,
                                         Setter)
@@ -13,8 +14,9 @@ __all__ = ['AttributeSetter',
            'get_descriptor',
            'get_descriptor_from',
            'mangle_name',
-           'name_of',
            'NameMangler',
+           'name_of',
+           'id_name_of',
            'set_on',
            'setattribute',
            'Setter',

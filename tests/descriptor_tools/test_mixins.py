@@ -1,152 +1,13 @@
 from unittest import TestCase
 
 from descriptor_tools import UnboundAttribute, DescDict
-from descriptor_tools.mixins import (BindingDataDescriptor,
-                                     NonBindingDataDescriptor,
-                                     BindingGetter)
+from descriptor_tools.mixins import (Getters,
+                                     Storage)
 from tests.descriptor_tools import test_mocks as mocks
 
 
-class BindingDataDescriptorMixin_Test(TestCase):
-    class Desc(BindingDataDescriptor):
-        pass
-
-    def setUp(self):
-        self.desc = self.Desc()
-        self.instance = mocks.ClassWithDescriptor(self.desc)
-        self.Class = type(self.instance)
-
-    def test_get_from_instance(self):
-        self.desc.storage[self.instance] = 5
-
-        result = self.desc.__get__(self.instance, self.Class)
-
-        self.assertEqual(result, 5)
-
-    def test_get_from_class_is_UnboundAttribute(self):
-        result = self.desc.__get__(None, self.Class)
-
-        self.assertIsInstance(result, UnboundAttribute)
-
-    def test_get_from_class_has_correct_descriptor(self):
-        result = self.desc.__get__(None, self.Class)
-
-        self.assertIs(result.descriptor, self.desc)
-
-    def test_get_from_class_has_correct_owner(self):
-        result = self.desc.__get__(None, self.Class)
-
-        self.assertIs(result.owner, self.Class)
-
-    def test_set(self):
-        self.desc.__set__(self.instance, 5)
-
-        self.assertEqual(self.desc.storage[self.instance], 5)
-
-    def test_delete(self):
-        self.desc.storage[self.instance] = 5
-
-        self.desc.__delete__(self.instance)
-
-        self.assertNotIn(self.instance, self.desc.storage)
-
-    def test_get_from_instance_as_property(self):
-        self.desc.storage[self.instance] = 5
-
-        result = self.instance.attr
-
-        self.assertEqual(result, 5)
-
-    def test_get_from_class_as_property_is_UnboundAttribute(self):
-        result = self.Class.attr
-
-        self.assertIsInstance(result, UnboundAttribute)
-
-    def test_get_from_class_as_property_has_correct_descriptor(self):
-        result = self.Class.attr
-
-
-        self.assertIs(result.descriptor, self.desc)
-
-    def test_get_from_class_as_property_has_correct_owner(self):
-        result = self.Class.attr
-
-        self.assertIs(result.owner, self.Class)
-
-    def test_set_as_property(self):
-        self.instance.attr = 5
-
-        self.assertEqual(self.desc.storage[self.instance], 5)
-
-    def test_delete_as_property(self):
-        self.desc.storage[self.instance] = 5
-
-        del self.instance.attr
-
-        self.assertFalse(self.instance in self.desc.storage)
-
-
-class NonBindingDataDescriptorMixin_Test(TestCase):
-    class Desc(NonBindingDataDescriptor):
-        pass
-
-    def setUp(self):
-        self.desc = self.Desc()
-        self.instance = mocks.ClassWithDescriptor(self.desc)
-        self.Class = type(self.instance)
-
-    def test_get_from_instance(self):
-        self.desc.storage[self.instance] = 5
-
-        result = self.desc.__get__(self.instance, self.Class)
-
-        self.assertEqual(result, 5)
-
-    def test_get_from_class(self):
-        result = self.desc.__get__(None, self.Class)
-
-        self.assertIs(result, self.desc)
-
-    def test_set(self):
-        self.desc.__set__(self.instance, 5)
-
-        self.assertEqual(self.desc.storage[self.instance], 5)
-
-    def test_delete(self):
-        self.desc.storage[self.instance] = 5
-
-        self.desc.__delete__(self.instance)
-
-        self.assertNotIn(self.instance, self.desc.storage)
-
-    def test_get_from_instance_as_property(self):
-        self.desc.storage[self.instance] = 5
-
-        result = self.instance.attr
-
-        self.assertEqual(result, 5)
-
-    def test_get_from_class(self):
-        result = self.Class.attr
-
-
-        self.assertIs(result, self.desc)
-
-    def test_set_as_property(self):
-        self.instance.attr = 5
-
-        self.assertEqual(self.desc.storage[self.instance], 5)
-
-    def test_delete_as_property(self):
-        self.desc.storage[self.instance] = 5
-
-        del self.instance.attr
-
-        self.assertFalse(self.instance in self.desc.storage)
-
-
-class BindingGetter_Test(TestCase):
-    class Desc(BindingGetter):
+class Getter_Binding_Test(TestCase):
+    class Desc(Getters.Binding):
         def __init__(self):
             self.storage = DescDict()
 
@@ -180,10 +41,198 @@ class BindingGetter_Test(TestCase):
         self.assertEqual(result, 5)
 
 
+class Getter_SelfReturning_Test(TestCase):
+    class Desc(Getters.SelfReturning):
+        def _get(self, instance):
+            return 5
+
+    def setUp(self):
+        self.desc = self.Desc()
+        self.instance = mocks.ClassWithDescriptor(self.desc)
+        self.Class = type(self.instance)
+
+    def test_get_from_class_is_desc(self):
+        result = self.desc.__get__(None, self.Class)
+
+        self.assertIs(result, self.desc)
+
+    def test_get_from_instance_is_value(self):
+        result = self.desc.__get__(self.instance, self.Class)
+
+        self.assertEqual(result, 5)
 
 
+class Storage_DescDict_Test(TestCase):
+    class Class:
+        pass
+
+    def setUp(self):
+        self.mixin = Storage.DescDict()
+        self.instance = self.Class()
+
+    def test_uses_DescDict_storage(self):
+        self.assertIsInstance(self.mixin.storage, DescDict)
+
+    def test_get_retrieves_from_storage(self):
+        self.mixin.storage[self.instance] = 5
+
+        result = self.mixin._get(self.instance)
+
+        self.assertEqual(result, 5)
+
+    def test_set_applies_to_storage(self):
+        self.mixin._set(self.instance, 5)
+
+        result = self.mixin._get(self.instance)
+
+        self.assertEqual(result, 5)
+
+    def test_delete_applies_to_storage(self):
+        self.mixin.storage[self.instance] = 5
+
+        self.mixin._delete(self.instance)
+
+        self.assertFalse(self.instance in self.mixin.storage)
 
 
+class Storage_KeyByName_UsingPreAndPostFix_Test(TestCase):
+    class Class:
+        attr = Storage.KeyByName(prefix='_', postfix='_')
+
+    def setUp(self):
+        self.mixin = self.Class.attr
+        self.instance = self.Class()
+
+    def test_name_getter(self):
+        result = self.mixin._name(self.instance)
+
+        self.assertEqual(result, '_attr_')
+
+    def test_name_getter_works_multiple_times(self):
+        """
+        Because OnInstance tries to cache the _name, I want to make sure
+        subsequent lookups still work
+        """
+        result1 = self.mixin._name(self.instance)
+        result2 = self.mixin._name(self.instance)
+
+        self.assertEqual(result1, result2)
+
+    def test_get_retrieves_from_instance(self):
+        self.instance._attr_ = 5
+
+        result = self.mixin._get(self.instance)
+
+        self.assertEqual(result, 5)
+
+    def test_set_applies_to_instance(self):
+        self.mixin._set(self.instance, 5)
+
+        result = self.instance._attr_
+
+        self.assertEqual(result, 5)
+
+    def test_delete_applies_to_instance(self):
+        self.instance._attr_ = 5
+
+        self.mixin._delete(self.instance)
+
+        self.assertFalse(hasattr(self.instance, '_attr_'))
+
+
+class Storage_KeyByName_UsingName_Test(TestCase):
+    class Class:
+        attr = Storage.KeyByName(name='subattr')
+
+    def setUp(self):
+        self.mixin = self.Class.attr
+        self.instance = self.Class()
+
+    def test_name_getter(self):
+        result = self.mixin._name(self.instance)
+
+        self.assertEqual(result, 'subattr')
+
+    def test_get_retrieves_from_instance(self):
+        self.instance.subattr = 5
+
+        result = self.mixin._get(self.instance)
+
+    def test_set_applies_to_instance(self):
+        self.mixin._set(self.instance, 5)
+
+        result = self.instance.subattr
+
+        self.assertEqual(result, 5)
+
+    def test_delete_applies_to_instance(self):
+        self.instance.subattr = 5
+
+        self.mixin._delete(self.instance)
+
+        self.assertFalse(hasattr(self.instance, 'subattr'))
+
+
+class Desc(Getters.SelfReturning, Storage.KeyByName):
+    def __set__(self, instance, value):
+        self._set(instance, value)
+
+    def __delete__(self, instance):
+        self._delete(instance)
+
+class Storage_KeyByName_UsingSameName_AsDescriptor_Test(TestCase):
+    class Class:
+        attr = Desc()
+
+    def setUp(self):
+        self.desc = self.Class.attr
+        self.instance = self.Class()
+
+    def test_name_getter(self):
+        result = self.desc._name(self.instance)
+
+        self.assertEqual(result, 'attr')
+
+    def test_get_retrieves_from_instance(self):
+        self.instance.__dict__['attr'] = 5
+
+        result = self.instance.attr
+
+        self.assertEqual(result, 5)
+
+    def test_set_applies_to_instance(self):
+        self.instance.attr = 5
+
+        result = self.desc._get(self.instance)
+
+        self.assertEqual(result, 5)
+
+    def test_delete_applies_to_instance(self):
+        self.desc._set(self.instance, 5)
+
+        del self.instance.attr
+
+        self.assertFalse('attr' in self.instance.__dict__)
+
+
+class Desc(Getters.SelfReturning, Storage.KeyById):
+    def __set__(self, instance, value):
+        self._set(instance, value)
+
+    def __delete__(self, instance):
+        self._delete(instance)
+
+class Storage_KeyById_Test(TestCase):
+    class Class:
+        attr = Desc()
+
+    def setUp(self):
+        self.desc = self.Class.attr
+        self.instance = self.Class()
+        self.attrName = self.desc._name
+
+    def test_(self):
+        pass
 
 
 
