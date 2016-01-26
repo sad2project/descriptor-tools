@@ -122,4 +122,7 @@ class Setters:
             self._set(instance, value)
 
 
-
+class Deleters:
+    class Default:
+        def __delete__(self, instance):
+            self._delete(instance)

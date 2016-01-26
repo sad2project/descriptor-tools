@@ -3,7 +3,8 @@ from unittest import TestCase
 from descriptor_tools import UnboundAttribute, DescDict, id_name_of
 from descriptor_tools.mixins import (Getters,
                                      Storage,
-                                     Setters)
+                                     Setters,
+                                     Deleters)
 from tests.descriptor_tools import test_mocks as mocks
 
 
@@ -321,8 +322,23 @@ class Setters_Default_Test(TestCase):
         self.assertEqual(self.instance.attr, 5)
 
 
+class Desc(Getters.SelfReturning, Setters.Default, Deleters.Default, Storage.DescDict):
+    pass
 
+class Deleters_Default_Test(TestCase):
+    class Class:
+        attr = Desc()
 
+    def setUp(self):
+        self.desc = self.Class.attr
+        self.instance = self.Class()
+
+    def test_delete(self):
+        self.instance.attr = 5
+
+        self.desc.__delete__(self.instance)
+
+        self.assertFalse(hasattr(self.instance, 'attr'))
 
 
 
