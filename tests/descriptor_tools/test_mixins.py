@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from descriptor_tools import UnboundAttribute, DescDict
+from descriptor_tools import UnboundAttribute, DescDict, id_name_of
 from descriptor_tools.mixins import (Getters,
                                      Storage)
 from tests.descriptor_tools import test_mocks as mocks
@@ -231,8 +231,36 @@ class Storage_KeyById_Test(TestCase):
         self.instance = self.Class()
         self.attrName = self.desc._name
 
-    def test_(self):
-        pass
+    def test_name_is_correct(self):
+        expected = id_name_of(self.desc)
+
+        self.assertEqual(self.attrName, expected)
+
+    def test_get(self):
+        setattr(self.instance, self.attrName, 5)
+
+        result = self.desc.__get__(self.instance, self.Class)
+
+        self.assertEqual(result, 5)
+
+    def test_set_item_exists(self):
+        self.desc.__set__(self.instance, 5)
+
+        self.assertTrue(hasattr(self.instance, self.desc._name))
+
+    def test_set_item_correct(self):
+        self.desc.__set__(self.instance, 5)
+
+        self.assertEqual(getattr(self.instance, self.desc._name), 5)
+
+    def test_delete(self):
+        self.instance.__dict__[self.attrName] = 5
+
+        self.desc.__delete__(self.instance)
+
+        self.assertFalse(hasattr(self.instance, self.desc._name))
+
+
 
 
 

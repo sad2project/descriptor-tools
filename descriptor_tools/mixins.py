@@ -91,3 +91,12 @@ class Storage:
         @property
         def _name(self):
             return id_name_of(self)
+
+        def _get(self, instance):
+            return instance.__dict__[self._name]
+
+        def _set(self, instance, value):
+            instance.__dict__[self._name] = value
+
+        def _delete(self, instance):
+            del instance.__dict__[self._name]
