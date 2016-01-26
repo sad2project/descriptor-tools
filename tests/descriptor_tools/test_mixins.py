@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from descriptor_tools import UnboundAttribute, DescDict, id_name_of
 from descriptor_tools.mixins import (Getters,
-                                     Storage)
+                                     Storage,
+                                     Setters)
 from tests.descriptor_tools import test_mocks as mocks
 
 
@@ -261,6 +262,63 @@ class Storage_KeyById_Test(TestCase):
         self.assertFalse(hasattr(self.instance, self.desc._name))
 
 
+class Desc(Getters.SelfReturning, Setters.Forced, Storage.DescDict):
+    pass
+
+class Setters_Forced_Test(TestCase):
+    class Class:
+        attr = Desc()
+
+    def setUp(self):
+        self.desc = self.Class.attr
+        self.instance = self.Class()
+
+    def test_unforced_fails(self):
+        with self.assertRaises(AttributeError):
+            self.desc.__set__(self.instance, 5)
+
+    def test_forced_works(self):
+        self.desc.__set__(self.instance, 5, force=True)
+
+        self.assertEqual(self.instance.attr, 5)
+
+
+class Desc(Getters.SelfReturning, Setters.Secret, Storage.DescDict):
+    pass
+
+class Setters_Secret_Test(TestCase):
+    class Class:
+        attr = Desc()
+
+    def setUp(self):
+        self.desc = self.Class.attr
+        self.instance = self.Class()
+
+    def test_normal_set_fails(self):
+        with self.assertRaises(AttributeError):
+            self.desc.__set__(self.instance, 5)
+
+    def test_secret_set_works(self):
+        self.desc.set(self.instance, 5)
+
+        self.assertEqual(self.instance.attr, 5)
+
+
+class Desc(Getters.SelfReturning, Setters.Default, Storage.DescDict):
+    pass
+
+class Setters_Default_Test(TestCase):
+    class Class:
+        attr = Desc()
+
+    def setUp(self):
+        self.desc = self.Class.attr
+        self.instance = self.Class()
+
+    def test_set(self):
+        self.desc.__set__(self.instance, 5)
+
+        self.assertEqual(self.instance.attr, 5)
 
 
 

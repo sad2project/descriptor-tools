@@ -100,3 +100,26 @@ class Storage:
 
         def _delete(self, instance):
             del instance.__dict__[self._name]
+
+
+class Setters:
+    class Forced:
+        def __set__(self, instance, value, force=False):
+            if force:
+                self._set(instance, value)
+            else:
+                raise AttributeError("Cannot set a read-only attribute")
+
+    class Secret:
+        def __set__(self, instance, value):
+            raise AttributeError("Cannot set a read-only attribute")
+
+        def set(self, instance, value):
+            self._set(instance, value)
+
+    class Default:
+        def __set__(self, instance, value):
+            self._set(instance, value)
+
+
+
