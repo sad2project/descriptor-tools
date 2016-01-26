@@ -3,8 +3,11 @@ from descriptor_tools.decorators import (DescriptorDecorator,
                                          lifted_desc_results,
                                          is_data_desc,
                                          Binding,
+                                         binding,
+                                         forced,
                                          SecretSet,
                                          SetOnce,
+                                         set_once,
                                          ForcedSet)
 from unittest import TestCase
 from tests.descriptor_tools import test_mocks as mocks
@@ -292,6 +295,100 @@ class SetOnce_Test(TestCase):
             self.instance.attr = 5
 
 
+class Binder:
+    def __init__(self):
+        self.get_called = False
+
+    @binding
+    def __get__(self, instance, owner):
+        self.get_called = True
+        return instance
+
+
+class BindingMethod_Test(TestCase):
+    class Class:
+        attr = Binder()
+
+    def test_get_by_class_retrieves_UnboundAttribute(self):
+        result = self.Class.attr
+
+        self.assertIsInstance(result, UnboundAttribute)
+
+    def test_get_by_class_doesnt_redirect(self):
+        result = self.Class.attr
+
+        self.assertFalse(result.descriptor.get_called)
+
+    def test_get_by_instance_redirects(self):
+        instance = self.Class()
+
+        instance.attr
+
+        self.assertTrue(self.Class.attr.get_called)
+
+
+class Forceful:
+    def __init__(self):
+        self.set_called = False
+
+    @forced
+    def __set__(self, instance, value):
+        self.set_called = True
+
+
+class SecretSetMethod_Test(TestCase):
+    class Class:
+        attr = Forceful()
+
+    def test_set_fails_without_force(self):
+        instance = self.Class()
+
+        with self.assertRaises(AttributeError):
+            instance.attr = 5
+
+    def test_set_doesnt_redirect_without_force(self):
+        instance = self.Class()
+
+        try:
+            instance.attr = 5
+        except AttributeError:
+            self.assertFalse(self.Class.attr.set_called)
+
+    def test_set_works_with_force(self):
+        instance = self.Class()
+
+        self.Class.attr.__set__(instance, 5, forced=True)
+
+        self.assertTrue(self.Class.attr.set_called)
+
+
+class FirstTimer:
+    def __init__(self):
+        self.set_called = False
+
+    @set_once
+    def __set__(self, instance, value):
+        self.set_called = True
+
+
+class SetOnceMethod_Test(TestCase):
+    class Class:
+        attr = FirstTimer()
+
+    def test_set_works_first_time(self):
+        instance = self.Class()
+
+        instance.attr = 5
+
+        self.assertTrue(self.Class.attr.set_called)
+
+    def test_set_doesnt_work_more_than_one_time(self):
+        instance = self.Class()
+
+        instance.attr = 5
+
+        with self.assertRaises(AttributeError):
+            instance.attr = 5
 
 
 

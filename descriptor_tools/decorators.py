@@ -1,7 +1,4 @@
-
-from . import UnboundAttribute
-from descriptor_tools import name_of
-from weakref import WeakSet
+from . import UnboundAttribute, name_of, DescDict
 from functools import wraps
 
 
@@ -103,13 +100,13 @@ class ForcedSet(DescriptorDecorator):
 class SetOnce(DescriptorDecorator):
     def __init__(self, desc):
         super().__init__(desc)
-        self.set_instances = WeakSet()
+        self.set_instances = DescDict()
 
     def __set__(self, instance, value):
         if self._already_set(instance):
             raise AttributeError("Cannot set a read-only attribute")
         else:
-            self.set_instances.add(instance)
+            self.set_instances[instance] = True
             super().__set__(instance, value)
 
     def _already_set(self, instance):
@@ -117,13 +114,38 @@ class SetOnce(DescriptorDecorator):
 
 
 # *****************
-# Method decorators
+# Method decorators2
 # *****************
 def binding(get):
     @wraps(get)
     def __get__(desc, instance, owner):
         if instance is None:
-            return UnboundAttribute(desc)
+            return UnboundAttribute(desc, owner)
         else:
             return get(desc, instance, owner)
     return __get__
+
+
+def forced(setter):
+    @wraps(setter)
+    def __set__(desc, instance, value, forced=False):
+        if forced:
+            return setter(desc, instance, value)
+        else:
+            raise AttributeError("Cannot set a read-only attribute")
+    return __set__
+
+
+def set_once(setter):
+    set_instances = DescDict()
+    @wraps(setter)
+    def __set__(desc, instance, value):
+        if instance in set_instances:
+            raise AttributeError("Cannot set a read-only attribute")
+        else:
+            set_instances[instance] = True
+            setter(desc, instance, value)
+    return __set__
+
+
+
