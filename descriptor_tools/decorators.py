@@ -58,6 +58,12 @@ class DescriptorDecorator:
     def __getattr__(self, item):
         return getattr(self.desc, item)
 
+    def __str__(self):
+        return str(self.desc)
+
+    def __repr__(self):
+        return repr(self.desc)
+
 
 def lifted_desc_results(wrapped, wrapper, instance, owner):
     result = wrapped.__get__(instance, owner)
@@ -80,6 +86,12 @@ class Binding(DescriptorDecorator):
         else:
             return super().__get__(instance, owner)
 
+    def __str__(self):
+        return "Binding " + super().__str__()
+
+    def __repr__(self):
+        return "Binding(" + super().__repr__() + ")"
+
 
 class SecretSet(DescriptorDecorator):
     def __set__(self, instance, value):
@@ -88,6 +100,12 @@ class SecretSet(DescriptorDecorator):
     def set(self, instance, value):
         super().__set__(instance, value)
 
+    def __str__(self):
+        return "Secret-Set " + super().__str__()
+
+    def __repr__(self):
+        return "SecretSet(" + super().__repr__() + ")"
+
 
 class ForcedSet(DescriptorDecorator):
     def __set__(self, instance, value, force=False):
@@ -95,6 +113,12 @@ class ForcedSet(DescriptorDecorator):
             super().__set__(instance, value)
         else:
             raise AttributeError("Cannot set a read-only attribute")
+
+    def __str__(self):
+        return "Forced-Set " + super().__str__()
+
+    def __repr__(self):
+        return "ForcedSet(" + super().__repr__() + ")"
 
 
 class SetOnce(DescriptorDecorator):
@@ -111,6 +135,12 @@ class SetOnce(DescriptorDecorator):
 
     def _already_set(self, instance):
         return instance in self.set_instances
+
+    def __str__(self):
+        return "Set-Once " + super().__str__()
+
+    def __repr__(self):
+        return "SetOnce(" + super().__repr__() + ")"
 
 
 # *****************

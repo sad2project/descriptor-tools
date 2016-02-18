@@ -206,3 +206,11 @@ class AttributeSetter:
         :param value: value to store on the attribute
         """
         self.set(attrname, value)
+
+    def __str__(self):
+        return 'Attribute Setter for ' + str(self.instance)
+
+    def __repr__(self):
+        instance_text = repr(self.instance)
+        attribute_text = ', ' +repr(self.attributes) if len(self.attributes) != 0 else ""
+        return 'AttributeSetter(' + instance_text + attribute_text + ')'

@@ -19,9 +19,17 @@ class LazyProperty:
         return value
 
     def _name(self, instance):
+        if instance is None:
+            return "<unknown name>"
         name = name_of(self, type(instance))
         self._name = lambda inst: name
         return name
+
+    def __str__(self):
+        return "Lazy Property: " + self._name(None)
+
+    def __repr__(self):
+        return self.__str__() +" "+ id(self)
 
 
 class BindingProperty(property):
@@ -42,6 +50,9 @@ class Constant:
 
     def __delete__(self, instance):
         raise AttributeError("Cannot delete a constant")
+
+    def __str__(self):
+        return "CONSTANT" + str(self.value)
 
 def withConstants(**kwargs):
   """
