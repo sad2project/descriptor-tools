@@ -1,5 +1,5 @@
 from descriptor_tools import UnboundAttribute
-from descriptor_tools.decorators import (DescriptorDecorator,
+from descriptor_tools.decorators import (DescriptorDecoratorBase,
                                          Binding,
                                          SecretSet,
                                          ForcedSet)

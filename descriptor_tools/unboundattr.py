@@ -41,27 +41,75 @@ class UnboundAttribute:
     """
     def __init__(self, descriptor, owner):
         """
+        Initialized with the descriptor to make calls on, as well as the
+        owner class that this was made for.
 
-        :param descriptor:
-        :param owner:
-        :return:
+        The descriptor should usually be the one that created this in the
+        first place. See the lift_descriptor() method for an instance where
+        this might not be true.
+
+        The owner is used to get passed back into the descriptor's __get__()
+        method.
+        :param descriptor: descriptor that all the get, set, and delete calls
+        are routed through
+        :param owner: used for descriptor __get__() call and string
+        representations
         """
         self.descriptor = descriptor
         self.owner = owner
 
     def __call__(self, instance):
+        """
+        Returns the value of the attribute that this object represents from
+        the given instance.
+        :param instance: instance to pull the attribute value from
+        :return: the value of the attribute on *instance*
+        """
         return self.descriptor.__get__(instance, self.owner)
 
     def set(self, instance, value):
+        """
+        Sets the given value to the attribute that this represents on the
+        given instance using the wrapped descriptor.
+
+        Note that this operation may fail or raise an exception if the wrapped
+        descriptor doesn't support it.
+        :param instance: instance to set the value for
+        :param value: value to set the attribute to
+        """
         self.descriptor.__set__(instance, value)
 
     def delete(self, instance):
+        """
+        Deletes the attribute that this represents from the given instance
+        using the wrapped descriptor.
+
+        Note that this operation may fail or raise an exception if the wrapped
+        descriptor doesn't support it.
+        :param instance: instance to delete the attribute from
+        """
         self.descriptor.__delete__(instance)
 
     def lift_descriptor(self, descriptor):
+        """
+        Returns a new UnboundAttribute that uses the given descriptor instead
+        of the original.
+
+        This method was created to increase support for usirg the decorator
+        pattern with descriptors. When wrapping a "binding" descriptor,
+        the wrapper needs itself to be the descriptor that the
+        UnboundAttribute calls. If the decorator inherits from
+        #DescriptorDecorator, this is handled for you.
+        :param descriptor: wrapper descriptor to switch in
+        :return: the new UnboundAttribute
+        """
         return UnboundAttribute(descriptor, self.owner)
 
     def __getattr__(self, item):
+        """
+        Redirects unknown attribute lookups to the wrapped descriptor
+        :param item: attribute being looked up
+        """
         return getattr(self.descriptor, item)
 
     def __str__(self):
@@ -75,3 +123,7 @@ class UnboundAttribute:
         ownerrep = repr(self.owner)
         return "{cls}({desc}, {owner})".format(cls=selfname, desc=descrep,
                                                owner=ownerrep)
+
+
+# TODO attempt a more universal UnboundAttribute implementation - one that
+#  can be used without the need for descriptors.

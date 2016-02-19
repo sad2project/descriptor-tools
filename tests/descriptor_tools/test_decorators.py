@@ -1,6 +1,6 @@
 from descriptor_tools import UnboundAttribute
-from descriptor_tools.decorators import (DescriptorDecorator,
-                                         lifted_desc_results,
+from descriptor_tools.decorators import (DescriptorDecoratorBase,
+                                         _lifted_desc_results,
                                          is_data_desc,
                                          Binding,
                                          binding,
@@ -16,17 +16,17 @@ from tests.descriptor_tools import test_mocks as mocks
 class Lifted_Desc_Results_Test(TestCase):
     def test_self_lifting(self):
         wrapped = mocks.Descriptor()
-        wrapper = DescriptorDecorator(None)
+        wrapper = DescriptorDecoratorBase(None)
 
-        result = lifted_desc_results(wrapped, wrapper, None, object)
+        result = _lifted_desc_results(wrapped, wrapper, None, object)
 
         self.assertIs(result, wrapper)
 
     def test_Unbounded_lifting(self):
         wrapped = mocks.Binding(None)
-        wrapper = DescriptorDecorator(wrapped)
+        wrapper = DescriptorDecoratorBase(wrapped)
 
-        result = lifted_desc_results(wrapped, wrapper, None, object)
+        result = _lifted_desc_results(wrapped, wrapper, None, object)
 
         self.assertIs(result.descriptor, wrapper)
 
@@ -34,9 +34,9 @@ class Lifted_Desc_Results_Test(TestCase):
         wrapped = mocks.Descriptor()
         instance = mocks.ClassWithDescriptor(wrapped)
         instance.attr = 5
-        wrapper = DescriptorDecorator(wrapped)
+        wrapper = DescriptorDecoratorBase(wrapped)
 
-        result = lifted_desc_results(wrapped, wrapper, instance, type(instance))
+        result = _lifted_desc_results(wrapped, wrapper, instance, type(instance))
 
         self.assertEqual(result, 5)
 
@@ -64,12 +64,12 @@ class DescriptorDecorator_Base_Test(TestCase):
             return True
 
     def test_redirects_to_wrapped_methods(self):
-        wrapper = DescriptorDecorator(DescriptorDecorator_Base_Test.Wrapped())
+        wrapper = DescriptorDecoratorBase(DescriptorDecorator_Base_Test.Wrapped())
 
         self.assertTrue(wrapper.other_method())
 
     def test_doesnt_redirect_to_nonexistant_methods(self):
-        wrapper = DescriptorDecorator(DescriptorDecorator_Base_Test.Wrapped())
+        wrapper = DescriptorDecoratorBase(DescriptorDecorator_Base_Test.Wrapped())
 
         with self.assertRaises(AttributeError):
             wrapper.non_existant_method()
@@ -78,7 +78,7 @@ class DescriptorDecorator_Base_Test(TestCase):
 class DescriptorDecorator_WrappingANonDataDescriptor_Test(TestCase):
     def setUp(self):
         self.wrapped = mocks.Stubs.NonDataDescriptor()
-        self.decor = DescriptorDecorator(self.wrapped)
+        self.decor = DescriptorDecoratorBase(self.wrapped)
         self.instance = mocks.ClassWithDescriptor(self.decor)
         self.Class = type(self.instance)
 
@@ -113,7 +113,7 @@ class DescriptorDecorator_WrappingANonDataDescriptor_Test(TestCase):
 class DescriptorDecorator_WrappingADataDescriptor_Test(TestCase):
     def setUp(self):
         self.wrapped = mocks.Stubs.FullDataDescriptor()
-        self.decor = DescriptorDecorator(self.wrapped)
+        self.decor = DescriptorDecoratorBase(self.wrapped)
         self.instance = mocks.ClassWithDescriptor(self.decor)
         self.Class = type(self.instance)
 
@@ -153,7 +153,7 @@ class DescriptorDecorator_WrappingADataDescriptor_Test(TestCase):
 
 class DescriptorDecorator_WrappingADataDescriptorWithoutDelete(TestCase):
     def setUp(self):
-        self.decor = DescriptorDecorator(mocks.Stubs.DataDescriptorWithoutDelete())
+        self.decor = DescriptorDecoratorBase(mocks.Stubs.DataDescriptorWithoutDelete())
         self.instance = mocks.ClassWithDescriptor(self.decor)
 
     def test_delete_raises_AttributeError(self):
@@ -167,7 +167,7 @@ class DescriptorDecorator_WrappingADataDescriptorWithoutDelete(TestCase):
 
 class DescriptorDecorator_WrappingADataDescriptorWithoutSet(TestCase):
     def setUp(self):
-        self.decor = DescriptorDecorator(mocks.Stubs.DataDescriptorWithoutSet())
+        self.decor = DescriptorDecoratorBase(mocks.Stubs.DataDescriptorWithoutSet())
         self.instance = mocks.ClassWithDescriptor(self.decor)
 
     def test_set_raises_AttributeError(self):
@@ -181,7 +181,7 @@ class DescriptorDecorator_WrappingADataDescriptorWithoutSet(TestCase):
 
 class DescriptorDecorator_WrappingADataDescriptorWithoutGet(TestCase):
     def setUp(self):
-        self.decor = DescriptorDecorator(mocks.Stubs.DataDescriptorWithoutGet())
+        self.decor = DescriptorDecoratorBase(mocks.Stubs.DataDescriptorWithoutGet())
         self.instance = mocks.ClassWithDescriptor(self.decor)
         self.Class = type(self.instance)
 
@@ -198,7 +198,7 @@ class DescriptorDecorator_WrappingADataDescriptorWithoutGet(TestCase):
 
 class DescriptorDecorator_WrappingABindingDescriptor(TestCase):
     def setUp(self):
-        self.decor = DescriptorDecorator(mocks.Binding(mocks.Descriptor()))
+        self.decor = DescriptorDecoratorBase(mocks.Binding(mocks.Descriptor()))
         self.Class = type(mocks.ClassWithDescriptor(self.decor))
 
     def test_get_from_class_returns_UnboundAttribute(self):

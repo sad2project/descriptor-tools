@@ -1,5 +1,5 @@
 from unittest import TestCase
-from tests.descriptor_tools.test_mocks import Descriptor, DescriptorDecorator
+from tests.descriptor_tools.test_mocks import Descriptor, DescriptorDecoratorBase
 from descriptor_tools import UnboundAttribute
 
 
@@ -43,13 +43,13 @@ class UnboundAttr_Test(TestCase):
 class UnboundAttr_LiftDescriptor_Test(TestCase):
     def setUp(self):
         unboundattr = UnboundAttribute(Class.descAttr, Class)
-        self.wrapper_descriptor = DescriptorDecorator(Class.descAttr)
+        self.wrapper_descriptor = DescriptorDecoratorBase(Class.descAttr)
 
         self.new_unboundattr = unboundattr.lift_descriptor(self.wrapper_descriptor)
 
     def test_lift_descriptor_new_descriptor(self):
         unboundattr = UnboundAttribute(Class.descAttr, Class)
-        wrapper_descriptor = DescriptorDecorator(Class.descAttr)
+        wrapper_descriptor = DescriptorDecoratorBase(Class.descAttr)
 
         new_unboundattr = unboundattr.lift_descriptor(wrapper_descriptor)
 
@@ -58,7 +58,7 @@ class UnboundAttr_LiftDescriptor_Test(TestCase):
     def test_lift_descriptor_set(self):
         instance = Class()
         unboundattr = UnboundAttribute(Class.descAttr, Class)
-        wrapper_descriptor = DescriptorDecorator(Class.descAttr)
+        wrapper_descriptor = DescriptorDecoratorBase(Class.descAttr)
 
         new_unboundattr = unboundattr.lift_descriptor(wrapper_descriptor)
         new_unboundattr.set(instance, 5)
