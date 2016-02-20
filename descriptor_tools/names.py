@@ -22,7 +22,10 @@ def _first(iter):
 def id_name_of(descriptor):
     """
     Returns a string of the hexidecimal version of *descriptor*'s id,
-    sans the leading '0'. So, it'll be something like 'xf8e8aa97'
+    sans the leading '0'. So, it'll be something like 'xf8e8aa97'. It
+	removes the 0 so that it will start with an alpha character,
+	allowing it to still be a proper Python identifier, which keeps it
+	from breaking `dir()`
     :param descriptor: descriptor to generate the name for/from
     :return: a generated name for the given descriptor
     """
