@@ -1,11 +1,37 @@
 """
+The `decorators` module contains decorators of both stripes (function
+decorators and Gang of Four object decorators) for making different types
+of descriptors easier to create.
+
+Function decorators are provided to help with designing your own
+descriptors, while the object decorators are used to tweak existing
+descriptors.
+
+Function decorators that are included are `binding()`, `forced()`, and
+`set_once()`. `binding()` wraps the `__get__()` method on the descriptor
+to handle the boring details of creating a descriptor with attribute
+binding. The other two wrap the `__set__()` method of a descriptor to
+take care of the details for creating a "read-only" attribute.
+
+The included object decorators allow you to wrap instances of existing
+descriptors in order to use them as if they were descriptors of the
+wrapper types.
+
+There are object decorators for all four types of special accessors:
+binding, set-once, forced-set, and secret-set.
+
+All of the provided decorators inherit from `DescriptorDecoratorBase`.
 Due to the inability to know ahead of time which of the three descriptor
 methods will be defined on the wrapped descriptor, each of them end up
 implementing the logic to determine what needs to be done, whether the
 wrapped descriptor has the needed method and whether it's a data or
 non-data descriptor.
+
+I would have liked to dynamically create the non-automatic methods based
+on the object that's wrapped, but "magic" methods go straight to the class
+for method lookups, so the interpreter would always think that the non-
+automatic methods don't exist.
 """
-# todo to be continued
 from . import UnboundAttribute, name_of, DescDict
 from functools import wraps
 
