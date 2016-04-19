@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'descriptor_tools',
   packages = ['descriptor_tools'],
-  version = '1.0.1',
+  version = '1.0.2',
   description = 'A collection of classes and functions to make the creation of descriptors simpler and quicker',
   author = 'Jacob Zimmerman',
   author_email = 'sad2project@gmail.com',

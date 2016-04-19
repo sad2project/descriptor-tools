@@ -2,7 +2,6 @@
 setup.cfg
 setup.py
 descriptor_tools\__init__.py
-descriptor_tools\conf.py
 descriptor_tools\decorators.py
 descriptor_tools\desc_dict.py
 descriptor_tools\find_descriptors.py
