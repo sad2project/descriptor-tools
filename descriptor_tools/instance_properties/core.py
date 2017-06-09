@@ -1,9 +1,10 @@
 # coding=utf-8
 from abc import ABCMeta, abstractmethod
-from descriptor_tools import name_of, binding
+from descriptor_tools import name_of, DescDict
+from descriptor_tools.decorators import binding
 
 
-__all__ = ['InstanceProperty', 'by', 'DelegatedProperty']
+__all__ = ['InstanceProperty', 'by', 'by_ondesc', 'DelegatedProperty']
 
 
 class OnInstanceStorageStrategy:
@@ -17,6 +18,23 @@ class OnInstanceStorageStrategy:
 
     def assign(self, instprop, delegprop, instance):
         setattr(instance, instprop._secret_name, delegprop)
+
+
+class OnDescriptorStorageStrategy:
+    def __init__(self):
+        self.storage = DescDict()
+
+    def retrieve(self, instprop, instance):
+        try:
+            return self.storage[instance]
+        except KeyError as e:
+            raise AttributeError(
+                "Instance property, '{}', not yet initialized".format(
+                    instprop._name)
+            ) from e
+
+    def assign(self, instprop, delegprop, instance):
+        self.storage[instance] = delegprop
 
 
 class InstanceProperty:
@@ -118,6 +136,19 @@ def by(delegated_property_instantiation_function):
     :delegated_property_instantiation_function
     """
     return InstanceProperty(delegated_property_instantiation_function)
+
+
+def by_ondesc(delegated_property_instantiation_function):
+    """
+    Same as :by, but it instead has the :InstanceProperty use a different
+    strategy for storing the delegated properties using :DescDict instead of on
+    the instances.
+    :param delegated_property_instantiation_function:
+    :return:
+    """
+    return InstanceProperty(
+            delegated_property_instantiation_function,
+            delegate_storage=OnDescriptorStorageStrategy())
 
 
 class InstancePropertyInitializer:

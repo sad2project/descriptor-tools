@@ -84,3 +84,8 @@ class InstancePropertyTest(TestCase):
             self.fail()
         except AttributeError as e:
             self.assertIn("Cannot set new value on read-only attribute, 'attr'", str(e))
+
+
+class OnDescriptorInstancePropertyTest(TestCase):
+    def test_TODO(self):
+        self.fail("Still need to test the on-descriptor storage method")

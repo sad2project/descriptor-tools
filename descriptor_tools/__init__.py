@@ -86,15 +86,6 @@ from descriptor_tools.unboundattr import UnboundAttribute
 from descriptor_tools.properties import (BindingProperty,
                                          LazyProperty,
                                          withConstants)
-from descriptor_tools.decorators import (Binding,
-                                         binding,
-                                         forced,
-                                         ForcedSet,
-                                         SecretSet,
-                                         set_once,
-                                         SetOnce,
-                                         is_data_desc,
-                                         DescriptorDecoratorBase)
 
 # does not automatically export the decorators or mixins modules
 
