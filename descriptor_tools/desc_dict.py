@@ -1,3 +1,4 @@
+# coding=utf-8
 from collections import MutableMapping
 import weakref
 from ctypes import cast, py_object

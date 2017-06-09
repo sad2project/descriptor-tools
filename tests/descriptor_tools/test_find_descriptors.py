@@ -1,6 +1,8 @@
+# coding=utf-8
 from unittest import TestCase
 import tests.descriptor_tools.test_mocks as mocks
 from descriptor_tools import get_descriptor_from, get_descriptor, name_of
+from descriptor_tools.decorators import Binding
 from descriptor_tools.find_descriptors import _find_descriptor
 
 attrname = mocks.attrname
@@ -24,7 +26,7 @@ class Get_Descriptor_Test(TestCase):
         self.assertIs(result, cls.__dict__[attrname])
 
     def test_with_binding_descriptor(self):
-        cls = type(mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor())))
+        cls = type(mocks.ClassWithDescriptor(Binding(mocks.Descriptor())))
 
         result = get_descriptor(cls, attrname)
 
@@ -46,7 +48,7 @@ class Get_Descriptor_From_Test(TestCase):
         self.assertIs(result, cls.__dict__[attrname])
 
     def test_with_binding_descriptor(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
+        instance = mocks.ClassWithDescriptor(Binding(mocks.Descriptor()))
         cls = type(instance)
 
         result = get_descriptor_from(instance, attrname)
@@ -68,7 +70,7 @@ class _FindDescriptor_Test(TestCase):
         self.assertIs(result, cls.__dict__[attrname])
 
     def test_with_binding_descriptor(self):
-        cls = type(mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor())))
+        cls = type(mocks.ClassWithDescriptor(Binding(mocks.Descriptor())))
 
         result = _find_descriptor(cls, attrname)
 

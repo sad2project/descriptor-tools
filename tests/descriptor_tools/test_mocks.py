@@ -1,8 +1,4 @@
-from descriptor_tools import UnboundAttribute
-from descriptor_tools.decorators import (DescriptorDecoratorBase,
-                                         Binding,
-                                         SecretSet,
-                                         ForcedSet)
+# coding=utf-8
 
 
 class _Getter:

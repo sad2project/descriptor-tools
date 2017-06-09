@@ -1,5 +1,7 @@
+# coding=utf-8
 from unittest import TestCase
 import tests.descriptor_tools.test_mocks as mocks
+from descriptor_tools.decorators import ForcedSet, SecretSet, Binding
 from descriptor_tools.set_attrs import *
 
 prefix = "_"
@@ -72,28 +74,28 @@ class Setters_Test(TestCase):
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_forced_setting(self):
-        instance = mocks.ClassWithDescriptor(mocks.ForcedSet(mocks.Descriptor()))
+        instance = mocks.ClassWithDescriptor(ForcedSet(mocks.Descriptor()))
 
         Setter.forced(instance, attrname, 0, binding=False)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_secret_setting(self):
-        instance = mocks.ClassWithDescriptor(mocks.SecretSet(mocks.Descriptor()))
+        instance = mocks.ClassWithDescriptor(SecretSet(mocks.Descriptor()))
 
         Setter.secret(instance, attrname, 0, binding=False)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_basic_setting_with_binding_descriptor(self):
-        instance = mocks.ClassWithDescriptor(mocks.Binding(mocks.Descriptor()))
+        instance = mocks.ClassWithDescriptor(Binding(mocks.Descriptor()))
 
         Setter.basic(instance, attrname, 0, binding=True)
 
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_forced_setting_with_binding_descriptor(self):
-        instance = mocks.ClassWithDescriptor(mocks.ForcedSet(mocks.Binding(
+        instance = mocks.ClassWithDescriptor(ForcedSet(Binding(
                 mocks.Descriptor())))
 
         Setter.forced(instance, attrname, 0, binding=True)
@@ -101,7 +103,7 @@ class Setters_Test(TestCase):
         self.assertEqual(getattr(instance, attrname), 0)
 
     def test_secret_setting_with_binding_descriptor(self):
-        instance = mocks.ClassWithDescriptor(mocks.SecretSet(mocks.Binding(
+        instance = mocks.ClassWithDescriptor(SecretSet(Binding(
                 mocks.Descriptor())))
 
         Setter.secret(instance, attrname, 0, binding=True)

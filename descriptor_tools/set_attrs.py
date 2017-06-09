@@ -1,3 +1,4 @@
+# coding=utf-8
 import functools
 from . import get_descriptor_from
 

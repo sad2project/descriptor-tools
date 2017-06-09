@@ -77,7 +77,12 @@ class Storage:
         storage medium.
         """
         def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+            try:
+                super().__init__(*args, **kwargs)
+            except TypeError:
+                # This is expected when the mixin is not used with multiple
+                # inheritance, in which case, we just ignore it.
+                pass
             self.storage = DescDict()
 
         def _get(self, instance):
@@ -98,7 +103,12 @@ class Storage:
         under.
         """
         def __init__(self, *args, name=None, prefix='', postfix='', **kwargs):
-            super().__init__(self, *args, **kwargs)
+            try:
+                super().__init__(self, *args, **kwargs)
+            except TypeError:
+                # This is expected when the mixin is not used with multiple
+                # inheritance, in which case, we just ignore it.
+                pass
             if name is None:
                 self.mangle = NameMangler(prefix=prefix, postfix=postfix)
             else:

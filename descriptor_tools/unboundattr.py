@@ -1,3 +1,4 @@
+# coding=utf-8
 from descriptor_tools import name_of
 
 

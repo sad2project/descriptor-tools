@@ -1,3 +1,4 @@
+# coding=utf-8
 from descriptor_tools import UnboundAttribute
 from descriptor_tools.decorators import (DescriptorDecoratorBase,
                                          _lifted_desc_results,
@@ -23,7 +24,7 @@ class Lifted_Desc_Results_Test(TestCase):
         self.assertIs(result, wrapper)
 
     def test_Unbounded_lifting(self):
-        wrapped = mocks.Binding(None)
+        wrapped = Binding(None)
         wrapper = DescriptorDecoratorBase(wrapped)
 
         result = _lifted_desc_results(wrapped, wrapper, None, object)
@@ -198,7 +199,7 @@ class DescriptorDecorator_WrappingADataDescriptorWithoutGet(TestCase):
 
 class DescriptorDecorator_WrappingABindingDescriptor(TestCase):
     def setUp(self):
-        self.decor = DescriptorDecoratorBase(mocks.Binding(mocks.Descriptor()))
+        self.decor = DescriptorDecoratorBase(Binding(mocks.Descriptor()))
         self.Class = type(mocks.ClassWithDescriptor(self.decor))
 
     def test_get_from_class_returns_UnboundAttribute(self):

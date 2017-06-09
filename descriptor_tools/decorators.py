@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 The `decorators` module contains decorators of both stripes (function
 decorators and Gang of Four object decorators) for making different types

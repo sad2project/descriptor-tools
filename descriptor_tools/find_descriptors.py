@@ -45,5 +45,6 @@ def _find_descriptor(cls, descname):
                             if descname in clss.__dict__)
     return selected_class.__dict__[descname]
 
+
 def _first(iter):
     return next(iter, None)
