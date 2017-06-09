@@ -28,7 +28,7 @@ The forced-set method is similar to the secret-set method in that they both allo
 
 Secret-set descriptors use a "secret" method to set the attribute, which is usually the `set()` method (as opposed to the `__set__()` method). This is generally preferred over the forced-set style because it doesn't require someone to explicitly call a "magic" method, and it doesn't alter the signature of a protocol method.
 
-###New Addition: Instance Properties!
+### New Addition: Instance Properties!
 These aren't mentioned in the book because they're new, but if the book ever gets a new edition, they will certainly be added. What are instance properties? They're a micro framework where you delegate to what are called 'delegated properties', a term and idea I "stole" from the Kotlin language. 
 
 Delegated properties are similar to descriptors, but because of the `InstanceProperty` wrapper/delegator, one exists per instance of the class they're assigned to. This allows you to write a class for dealing with typical property situations in a much simpler way, only needing to care about the one value for the one instance it's associated with. Check them out! Currently the only documentation on them is in doc strings found in the instance_properties package. Later, more convenient documentation will be available, hopefully on ReadTheDocs as well as here, in the Wiki.
