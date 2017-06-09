@@ -1,1 +1,10 @@
 Subclass? Compostition? TODO!!!
+
+
+
+    If you would prefer to use a different name, you could create a subclass of
+    :InstanceProperty and override :__set_name.
+
+    If you would prefer to store the delegated property in a completely
+    different way, you should create a delegated property storage strategy class
+    and pass in an instance to the keyword argument `delegate_storage`.
