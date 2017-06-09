@@ -36,4 +36,4 @@ Delegated properties are similar to descriptors, but because of the `InstancePro
 ### Other Points of Note
 There are quite a few little helper functions and classes within the library, most notably those for grabbing descriptor objects from classes (preventing the lookup from triggering the descriptor's `__get__()` method) and those for providing universal ways to assign values to attributes when they're read-only (since a back door must usually be present for initializing the value).
 
-Lastly, there are a few new "property" types: `BindingProperty`, which provides attribute binding to properties; constants, defined using the `withConstants()` function; and `LazyProperty`, which allows lazy instantiation of properties, given a evalutation method.
+Lastly, there are a few new "property" types: `BindingProperty`, which provides attribute binding to properties; constants, defined using the `withConstants()` function; and `LazyProperty`, which allows lazy instantiation of properties, given an evalutation method.
