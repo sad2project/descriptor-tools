@@ -3,7 +3,8 @@ from unittest import TestCase
 
 from descriptor_tools.instance_properties.core import (
                                         InstanceProperty,
-                                        InstancePropertyInitializer)
+                                        InstancePropertyInitializer,
+                                        by_ondesc)
 
 
 class MockDelegatedProperty:
@@ -87,5 +88,65 @@ class InstancePropertyTest(TestCase):
 
 
 class OnDescriptorInstancePropertyTest(TestCase):
-    def test_TODO(self):
-        self.fail("Still need to test the on-descriptor storage method")
+    class Class:
+        attr = by_ondesc(MockDelegatedProperty)
+
+    def test_given_unitialized_instance_when_calling__get__then_initializer_returned(self):
+        instance = self.Class()
+
+        initializer = instance.attr
+
+        self.assertIsInstance(initializer, InstancePropertyInitializer)
+
+    def test_given_initialized_instance_when_calling__get___then_gets_attribute_from_delegated_property(self):
+        instance = self.Class()
+        init_value = 1
+        instance.attr.initialize(init_value)
+
+        instance.attr
+
+        self.assertTrue(
+            self.Class.attr._delegate_storage.storage[instance].get_called,
+            "value not taken from delegated property")
+
+    def test_given_initialized_instance_when_calling__get__then_returns_delegate_value(self):
+        instance = self.Class()
+        init_value = 1
+        instance.attr.initialize(init_value)
+
+        end_value = instance.attr
+
+        self.assertEqual(end_value, init_value)
+
+    def test_given_unitialized_instance_when_calling__set__then_raise_exception(self):
+        instance = self.Class()
+
+        with self.assertRaises(AttributeError):
+            instance.attr = 1
+
+    def test_given_initialized_instance_when_calling__set__then_set_on_delegate(self):
+        instance = self.Class()
+        instance.attr.initialize(1)
+
+        instance.attr = 1
+
+        self.assertTrue(
+            self.Class.attr._delegate_storage.storage[instance].set_called,
+            "set not called on delegated property")
+
+    def test_given_initialized_readonly_delegate_when_calling__set__then_raise_exception(self):
+        class ReadOnlyDelegatedProperty:
+            def __init__(self, *args, **kwargs): pass
+            def get(self): pass
+
+        class Class:
+            attr = by_ondesc(ReadOnlyDelegatedProperty)
+
+        instance = Class()
+        instance.attr.initialize(1)
+
+        try:
+            instance.attr = 1
+            self.fail()
+        except AttributeError as e:
+            self.assertIn("Cannot set new value on read-only attribute, 'attr'", str(e))
