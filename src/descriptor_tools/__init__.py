@@ -76,16 +76,17 @@ from descriptor_tools.find_descriptors import (get_descriptor_from,
                                                get_descriptor)
 from descriptor_tools.names import (name_of,
                                     id_name_of)
+from descriptor_tools.unboundattr import UnboundAttribute
+from descriptor_tools.properties import (BindingProperty,
+                                         LazyProperty,
+                                         withConstants)
 from descriptor_tools.set_attrs import (AttributeSetter,
+                                        get_descriptor_from,
                                         mangle_name,
                                         NameMangler,
                                         set_on,
                                         setattribute,
                                         Setter)
-from descriptor_tools.unboundattr import UnboundAttribute
-from descriptor_tools.properties import (BindingProperty,
-                                         LazyProperty,
-                                         withConstants)
 
 # does not automatically export the decorators or mixins modules
 
@@ -94,7 +95,7 @@ __all__ = ['AttributeSetter',
            'DescDict',
            'get_descriptor',
            'get_descriptor_from',
-           'LazyProperty'
+           'LazyProperty',
            'mangle_name',
            'NameMangler',
            'name_of',
@@ -104,12 +105,6 @@ __all__ = ['AttributeSetter',
            'Setter',
            'UnboundAttribute',
            'withConstants',
-           'Binding',
-           'binding',
            'forced',
-           'ForcedSet',
-           'SecretSet',
            'set_once',
-           'SetOnce',
-           'is_data_desc',
-           'DescriptorDecoratorBase']
+           'is_data_desc']

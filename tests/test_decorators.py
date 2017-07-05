@@ -1,4 +1,7 @@
 # coding=utf-8
+from unittest import TestCase
+
+import test_mocks as mocks
 from descriptor_tools import UnboundAttribute
 from descriptor_tools.decorators import (DescriptorDecoratorBase,
                                          _lifted_desc_results,
@@ -10,8 +13,6 @@ from descriptor_tools.decorators import (DescriptorDecoratorBase,
                                          SetOnce,
                                          set_once,
                                          ForcedSet)
-from unittest import TestCase
-from tests.descriptor_tools import test_mocks as mocks
 
 
 class Lifted_Desc_Results_Test(TestCase):

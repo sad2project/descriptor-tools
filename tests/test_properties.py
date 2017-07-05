@@ -3,8 +3,8 @@ from unittest import TestCase
 
 from descriptor_tools import UnboundAttribute
 from descriptor_tools.properties import (LazyProperty,
-                                         BindingProperty,
-                                         withConstants)
+                                             BindingProperty,
+                                             withConstants)
 
 
 class LazyProperty_NormalFunction_Test(TestCase):

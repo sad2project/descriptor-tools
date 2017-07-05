@@ -1,8 +1,10 @@
 # coding=utf-8
 from unittest import TestCase
-from tests.descriptor_tools.test_mocks import Descriptor
+
 from descriptor_tools import UnboundAttribute
+
 from descriptor_tools.decorators import DescriptorDecoratorBase
+from test_mocks import Descriptor
 
 
 class Class:

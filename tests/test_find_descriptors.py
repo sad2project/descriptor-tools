@@ -1,6 +1,7 @@
 # coding=utf-8
 from unittest import TestCase
-import tests.descriptor_tools.test_mocks as mocks
+
+import test_mocks as mocks
 from descriptor_tools import get_descriptor_from, get_descriptor, name_of
 from descriptor_tools.decorators import Binding
 from descriptor_tools.find_descriptors import _find_descriptor

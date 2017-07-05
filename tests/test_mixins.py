@@ -1,11 +1,11 @@
 # coding=utf-8
 from unittest import TestCase
 
+import test_mocks as mocks
 from descriptor_tools import UnboundAttribute, DescDict, id_name_of
 from descriptor_tools.mixins import (Getters,
                                      Storage,
                                      Setters)
-from tests.descriptor_tools import test_mocks as mocks
 
 
 class Getter_Binding_Test(TestCase):

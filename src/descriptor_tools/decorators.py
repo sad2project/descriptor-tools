@@ -33,7 +33,7 @@ on the object that's wrapped, but "magic" methods go straight to the class
 for method lookups, so the interpreter would always think that the non-
 automatic methods don't exist.
 """
-from . import UnboundAttribute, name_of, DescDict
+from descriptor_tools import UnboundAttribute, name_of, DescDict
 from functools import wraps
 
 

@@ -1,5 +1,6 @@
 # coding=utf-8
 from descriptor_tools import name_of
+
 from descriptor_tools.decorators import binding
 
 __all__ = ['LazyProperty', 'BindingProperty', 'withConstants']

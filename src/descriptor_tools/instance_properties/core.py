@@ -1,8 +1,9 @@
 # coding=utf-8
 from abc import ABCMeta, abstractmethod
-from descriptor_tools import name_of, DescDict
-from descriptor_tools.decorators import binding
 
+from descriptor_tools import name_of, DescDict
+
+from src.descriptor_tools.decorators import binding
 
 __all__ = ['InstanceProperty', 'by', 'by_ondesc', 'DelegatedProperty']
 
