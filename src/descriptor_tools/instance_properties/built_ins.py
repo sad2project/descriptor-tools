@@ -9,6 +9,13 @@ no_value = object()
 
 
 class Lazy(DelegatedProperty):
+    """
+    :Lazy defines a type of delegated property that
+    """
+
+    def set_meta(self, descriptor, instance, name):
+        pass
+
     def __init__(self, initializer, **kwargs):
         self.value = no_value
         self.initializer = initializer
