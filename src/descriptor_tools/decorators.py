@@ -35,6 +35,7 @@ automatic methods don't exist.
 """
 from descriptor_tools import UnboundAttribute, name_of, DescDict
 from functools import wraps
+from operator import attrgetter
 
 
 __all__ = ["DescriptorDecoratorBase",
@@ -132,7 +133,7 @@ class Binding(DescriptorDecoratorBase):
     """
     def __get__(self, instance, owner):
         if instance is None:
-            return UnboundAttribute(self, owner)
+            return attrgetter(name_of(self, owner))
         else:
             return super().__get__(instance, owner)
 
@@ -226,7 +227,7 @@ def binding(get):
     @wraps(get)
     def __get__(desc, instance, owner):
         if instance is None:
-            return UnboundAttribute(desc, owner)
+            return attrgetter(name_of(desc, owner))
         else:
             return get(desc, instance, owner)
     return __get__
