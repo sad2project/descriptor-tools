@@ -2,7 +2,7 @@
 from descriptor_tools.instance_properties import DelegatedProperty
 
 
-__all__ = ['Lazy', 'LateInit', 'ReadOnlyLateInit', 'ByMap', 'ReadOnly']
+__all__ = ['Lazy', 'LateInit', 'ByMap']
 
 
 no_value = object()
@@ -13,17 +13,14 @@ class Lazy(DelegatedProperty):
     :Lazy defines a type of delegated property that
     """
 
-    def set_meta(self, descriptor, instance, name):
-        pass
-
-    def __init__(self, initializer, **kwargs):
+    def __init__(self, initializer):
         self.value = no_value
         self.initializer = initializer
 
     def get(self):
         if self.value is no_value:
             self.value = self.initializer()
-            self.initializer = None  # release the initializer from memory
+            self.initializer = None  # release the initializer reference
         return self.value
 
     def set(self, value):
@@ -33,14 +30,21 @@ class Lazy(DelegatedProperty):
 
 
 class LateInit(DelegatedProperty):
-    def __init__(self, value=no_value, *, name, **kwargs):
+    def __init__(self, value=no_value):
         self.value = value
-        self.name = name
+        self._name = None
+        self._instance = None
+
+    def set_meta(self, instance, name):
+        self._name = name
+        self._instance = instance
 
     def get(self):
         if self.value is no_value:
             raise AttributeError(
-                "Attribute, {}, not yet initialized".format(self.name))
+                "Attribute '{}' on object {} not yet initialized".format(
+                    self._name,
+                    self._instance))
         else:
             return self.value
 
@@ -48,16 +52,8 @@ class LateInit(DelegatedProperty):
         self.value = value
 
 
-class ReadOnlyLateInit(LateInit, DelegatedProperty):
-    def set(self, value):
-        if self.value is no_value:
-            super().set(value)
-        else:
-            raise AttributeError
-
-
 class ByMap(DelegatedProperty):
-    def __init__(self, mapping, *, name, **kwargs):
+    def __init__(self, mapping, name):
         self.mapping = mapping
         self.name = name
 
@@ -68,17 +64,24 @@ class ByMap(DelegatedProperty):
         self.mapping[self.name] = value
 
 
-class ReadOnly(DelegatedProperty):
-    def __init__(self, delegate):
-        self.delegate = delegate
+class Validating(DelegatedProperty):
+    def __init__(self, value, validator):
+        if not validator(value):
+            raise AttributeError("Failed initial validation")
+        self.value = value
+        self.validator = validator
+        self.name = None
+        self.instance = None
 
-    @classmethod
-    def of(cls, delegate):
-        return compose(cls, delegate)
+    def set_meta(self, instance, name):
+        self.instance = instance
+        self.name = name
 
     def get(self):
-        return self.delegate.get()
+        return self.value
 
-
-def compose(f, g):
-    return lambda *args, **kwargs: f(g(*args, **kwargs))
+    def set(self, value):
+        if not self.validator(value):
+            message = "{} is not a valid value for attribute '{}' on object {}"
+            raise AttributeError(
+                message.format(value, self.name, self.instance))

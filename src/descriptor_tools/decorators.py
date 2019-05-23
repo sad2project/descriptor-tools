@@ -33,7 +33,7 @@ on the object that's wrapped, but "magic" methods go straight to the class
 for method lookups, so the interpreter would always think that the non-
 automatic methods don't exist.
 """
-from descriptor_tools import UnboundAttribute, name_of, DescDict
+from descriptor_tools import name_of, DescDict
 from functools import wraps
 from operator import attrgetter
 
@@ -55,9 +55,17 @@ class DescriptorDecoratorBase:
     around descriptors. When making a descriptor decorator, inherit from
     this class to do it. Then only override the necessary methods,
     delegating to `super()` for the primary functionality.
+
+    Note: This class overrides `__getattr__()` in order to delegate to
+    methods on the wrapped object that this class doesn't handle, but it can't
+    do that for dunder methods, which are typically special-cased and must exist
+    on the class of the object to work.
     """
     def __init__(self, desc):
         self.desc = desc
+
+    def __call__(self, *args, **kwargs):
+        return self.desc(*args, **kwargs)
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -115,8 +123,6 @@ def _lifted_desc_results(wrapped, wrapper, instance, owner):
     result = wrapped.__get__(instance, owner)
     if result is wrapped:
         return wrapper
-    elif isinstance(result, UnboundAttribute):
-        return result.lift_descriptor(wrapper)
     else:
         return result
 
@@ -131,9 +137,12 @@ class Binding(DescriptorDecoratorBase):
     UnboundAttribute whenever accessed from the containing class instead of
     from an instance.
     """
+    def __call__(self, instance):
+        return self.__get__(instance, type(instance))
+
     def __get__(self, instance, owner):
         if instance is None:
-            return attrgetter(name_of(self, owner))
+            return self
         else:
             return super().__get__(instance, owner)
 
@@ -221,13 +230,13 @@ class SetOnce(_ReadOnly):
 def binding(get):
     """
     Decorates the `__get__()` method of a descriptor to turn the it into a
-    binding descriptor, which returns an UnboundAttribute whenever
+    binding descriptor, which returns an unbound attribute whenever
     accessed from the containing class instead of from an instance.
     """
     @wraps(get)
-    def __get__(desc, instance, owner):
+    def __get__(desc, instance, owner=None):
         if instance is None:
-            return attrgetter(name_of(desc, owner))
+            return desc.__get__
         else:
             return get(desc, instance, owner)
     return __get__

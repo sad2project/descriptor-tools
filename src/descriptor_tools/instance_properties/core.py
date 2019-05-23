@@ -3,7 +3,21 @@ from abc import ABCMeta, abstractmethod
 
 from descriptor_tools.storage import InstanceStorage, protected
 
-__all__ = ['InstanceProperty', 'DelegatedProperty', 'ReadOnly', 'Deletable']
+__all__ = ['InstanceProperty', 'DelegatedProperty']
+
+
+_use_default = object()
+
+
+def _default_of(argument, default_factory):
+    if argument is _use_default:
+        return default_factory()
+    else:
+        return argument
+
+
+def _default_storage():
+    return InstanceStorage(name_mangler=protected)
 
 
 class InstanceProperty:
@@ -15,55 +29,118 @@ class InstanceProperty:
     attribute access calls to the :DelegatedProperty for the instance.
 
     It should be noted that, by default, `__delete__()` fails with an
-    :AttributeError. In order to delete, you need to manually call the menthod
-    and pass in `allow=True` or decorate (Gang of Four style) the
-    :InstanceProperty object with a :Deletable.
+    :AttributeError. In order to delete, you need to set the keyword-only
+    parameter, `deletable` to `True`.
 
-    i.e. `attribute = Deletable(InstanceAttribute())`
+    You can also make a property be read-only (other than when initializing the
+    value) by setting the `readonly` keyword-only parameter to `True`.
+
+    When using an :InstanceProperty, you create a class-level attribute and
+    assign the :InstanceProperty to that, just like any other descriptor:
+
+        class Example:
+            attr = InstanceProperty(deletable=True)
+
+    Then, in `__init__()`, you assign a :DelegatedPropery instance to it:
+
+        ...
+            def __init__(self, someval):
+                self.attr = Validating(someval, is_numeric)
+
+    In this case, :Validating is the :DelegatedProperty type. It doesn't
+    strictly have to be done in `__init__()`; it simply needs to be done when
+    it is first being assigned to. Also, if you make an attribute deletable,
+    the first time you assign to the attribute after it's deleted, it needs to
+    be assigned a :DelegatedProperty
+
+    At all other times, you assign to the attribute completely normally:
+
+        inst = Example(5)
+        ...
+        print(inst.attr)  # prints 5
+        ...
+        inst.attr = 6
+
+    And these values will be delegated to the :DelegatedProperty (hence the
+    name) to deal with. Most - if not all - delegated properties store the
+    value within itself, but this is not strictly necessary. For example, it
+    could save the value in a database or a file, but caching it on the
+    property is still usually desired.
+
+    :InstanceProperty also works as an unbound attribute, similarly to unbound
+    methods. This means that using the class version of the property will
+    effectively work like using an `attrgetter` from the `operator` module. For
+    example:
+
+        # continuing with the example from above
+        exattr = Example.attr  # returns the "attrgetter"
+        print(exattr(inst))  # prints 6
+
+    At this time, this is implemented without any extra objects. `__get__()`
+    returns `self` when called without an instance and :InstanceProperty is a
+    callable type that, when called with an instance, returns the same result
+    as calling `__get__()` with an instance (which is what happens when you
+    access `inst.attr` in our examples).
     """
-    def __init__(self,
-                 delegate_storage=InstanceStorage.factory(name_mangler=protected)):
+
+    def __init__(self, storage=_use_default, *, readonly=False, deletable=False):
         """
         Initializes an :InstanceProperty object.
-        :param delegate_storage: A function that takes in a descriptor and
-            returns an :InstanceStorage, :DictStorage or equivalent. The
-            default factory is one that creates an :InstanceStorage that stores
-            it under the name of the descriptor's attribute, but with an '_'
-            prefix.
+        :param storage: An :InstanceStorage, :DictStorage or equivalent. By
+            default, this creates an :InstanceStorage that stores it under the
+            name of the descriptor's attribute, but with an '_' prefix.
+            e.g. 'attr' becomes '_attr'
         """
-        self._delegate_storage = delegate_storage(self)
+        self._delegate_storage = _default_of(storage, _default_storage)
+        self._delegate_storage.desc = self
+
+        self.readonly = readonly
+        self.deletable = deletable
 
     def __call__(self, instance):
-        return self.__get__(instance, type(instance))
+        return self.__get__(instance)
 
     def __set_name__(self, owner, name):
         self._delegate_storage.set_name(name)
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         if instance is None:
             return self
         else:
-            return self._delegate_storage.get(instance).get()
+            return self.__get_delegate(instance).get()
 
     def __set__(self, instance, value):
+        # uninitialized case - value is the delegate
         if instance not in self._delegate_storage:
             value.set_meta(*self._meta(instance))
             self._delegate_storage.set(instance, value)
-        else:
-            self._delegate_storage.get(instance).set(value)
-
-    def __delete__(self, instance, allow=False):
-        if not allow:
-            name = self._delegate_storage.get(instance).base_name
+        # initialized and read-only case
+        elif self.readonly:
+            name = self._delegate_storage.base_name
+            message = "You cannot change attribute '{}' on object {} because it is read-only"
             raise AttributeError(
-                str.format("Attribute '{}' on object {} cannot be deleted", name, self))
+                message.format(name, instance)
+            )
+        # initialized and writeable case - value is the property value
+        else:
+            self.__get_delegate(instance).set(value)
+
+    def __delete__(self, instance):
+        if not self.deletable:
+            name = self._delegate_storage.base_name
+            raise AttributeError(
+                "Attribute '{}' on object {} cannot be deleted".format(
+                    name,
+                    instance))
         self._delegate_storage.delete(instance)
 
     def _meta(self, instance):
         return (
-            self,
             instance,
             self._delegate_storage.name(instance))
+
+    def __get_delegate(self, instance):
+        return self._delegate_storage.get(instance)
 
 
 class DelegatedProperty(metaclass=ABCMeta):
@@ -74,22 +151,27 @@ class DelegatedProperty(metaclass=ABCMeta):
     with descriptors.
 
     It is not required to subclass :DelegatedProperty to create one, but it does
-    help label the class for what it is.
+    help label the class for what it is. Also, not subclassing means that you
+    will need to make a `set_meta()` method no matter what, even if it's a
+    no-op method.
 
     To create a Delegated Property, you need:
-    `set_meta(self, descriptor, instance, name)`
+    `set_meta(self, instance, name)`
     `get(self) -> value`
     `set(self, value)`
 
-    Implementing `set_meta()`:
+    Implementing `set_meta()` (optional):
     This method is called when the delegated property is added onto the Instance
     Property descriptor.
-    This method takes in a few arguments. These are the `descriptor` that
-    controls the delegated property, the `instance` that the delegated property
-    is associated with as well as the `name` of the attribute the descriptor is
-    stored under. You can use or ignore any of these however you please, but it
-    is typically recommended that you store the `name` so you can use it in any
-    error messages.
+    This method takes in a few arguments. These are the `instance` that the
+    delegated property is associated with as well as the `name` of the attribute
+    the descriptor is stored under. You can use or ignore any of these however
+    you please, but it is typically recommended that you store the `name` so you
+    can use it in any error messages, if you have any. The convention of this
+    library is to use both in error messages. For example, the error message
+    for attempting to write to a read-only attribute is "You cannot change
+    attribute '<attribute name>' on object <object string> because it is read-
+    only"
 
     Implementing `get()`:
     `get()` is a very simple method; the only parameter is `self`, and its only
@@ -97,27 +179,17 @@ class DelegatedProperty(metaclass=ABCMeta):
 
     Implementing `set()`:
     Other than `self`, `set()` has only the one other parameter, `value`, which
-    is the new value to set the property to.
+    is the new value to set the property to.e
 
     Final Implementation Notes:
     It is recommended that the value of the property be stored on the Delegated
     Property itself, rather than trying to find a place on `instance` to store
     it. Saving on `instance` always has the chance that you'll use a clashing
     name as another attribute, plus it adds yet another step of indirection.
-
-    You can attempt to create a read-only Delegated Property by causing `set()`
-    to do nothing or error out. Unless the whole point of the property is to be
-    read-only, though, use the :ReadOnly wrapper on an :InstanceProperty object
-    and that will take care of it as well. This way, you can design your
-    properties to be mutable but still also use them in a read-only fashion.
-
-    Any Delegated Property instance that needs to use `set()`, even though it's
-    supposed to be read-only (e.g. `LateInit`), cannot use the `ReadOnly`
-    decorator and will have to implement being read-only in their own way.
     """
-    @abstractmethod
-    def set_meta(self, descriptor, instance, name):
-        ...
+
+    def set_meta(self, instance, name):
+        pass
 
     @abstractmethod
     def get(self):
@@ -126,92 +198,3 @@ class DelegatedProperty(metaclass=ABCMeta):
     @abstractmethod
     def set(self, value):
         ...
-
-
-class Deletable:
-    """
-    :Deletable is a decorator of :InstanceProperty (Gang of Four decorator, not
-    a Python decorator) that makes it so that the property can be deleted from
-    an instance.
-
-    By default, :InstanceProperty raises an AttributeError when you try to
-    delete an attribute from an instance controlled by it, but wrapping it in
-    an instance of this class makes it deletable.
-
-    Example Usage:
-        `attribute = Deletable(InstanceProperty())`
-
-    Like any other proper decorator, this can be stacked with other decorators,
-    such as the :ReadOnly decorator (though it's weird to allow deleting an
-    attribute when you can't otherwise alter it).
-    """
-    def __init__(self, inst_prop):
-        """
-        Initializes a :Deletable instance property
-        :param inst_prop: An InstanceProperty object (or equivalent) to wrap
-        """
-        self.delegate = inst_prop
-
-    def __set_name__(self, owner, name):
-        self.delegate.__set__name__(owner, name)
-
-    def __call__(self, instance):
-        return self.delegate(instance)
-
-    def __get__(self, instance, owner):
-        return self.delegate.__get__(instance, owner)
-
-    def __set__(self, instance, value):
-        self.delegate.__set__(instance, value)
-
-    def __delete__(self, instance, allow=True):
-        self.delegate.__delete__(instance, allow=True)
-
-
-class ReadOnly:
-    """
-    :ReadOnly is a decorator of :InstanceProperty (Gang of Four decorator, not
-    a Python decorator) that makes it so that the property cannot be changed
-    from it's initial value. This helps in building immutable types.
-
-    Example Usage:
-        `attribute = ReadOnly(InstanceProperty())`
-
-        Then, in the `__init__()`
-        `self.attribute = ADelegatedProperty()`
-
-    Like any other proper decorator, this can be stacked with other decorators,
-    such as the :Deletable decorator (though it's weird to allow deleting an
-    attribute when ou can't otherwise alter it).
-    """
-    def __init__(self, inst_prop, *, silent=False):
-        """
-        Initializes a :ReadOnly instance property
-        :param inst_prop: An InstanceProperty object (or equivalent) to wrap
-        :param silent: Defaults to `False`, meaning that if `__set__()` is ever
-            called, an :AttributeError is raised. If set to `True`, the set
-            operation will fail silently.
-        """
-        self.delegate = inst_prop
-        self.silent = silent
-        self.names = {}
-
-    def __set_name__(self, owner, name):
-        self.names[owner] = name
-        self.delegate.__set__name__(owner, name)
-
-    def __call__(self, instance):
-        return self.delegate(instance)
-
-    def __get__(self, instance, owner):
-        return self.delegate.__get__(instance, owner)
-
-    def __set__(self, instance, value):
-        if self.silent:
-            return
-        name = self.names[type(instance)]
-        raise AttributeError(
-            str.format("Attribute '{}' on object {} is read-only", name, self))
-
-    def __delete__(self, instance, allow=False):
-        self.delegate.__delete__(instance, allow=allow)

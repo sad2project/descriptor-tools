@@ -13,8 +13,15 @@ def name_of(descriptor, owner):
     :param owner: class that "owns" the descriptor
     :return: the name the descriptor is stored under on *owner*
     """
-    return _first(attr for attr in dir(owner)
+    name = _first(attr for attr in dir(owner)
                   if (get_descriptor(owner, attr) is descriptor))
+    if name is None:
+        raise RuntimeError(
+            str.format(
+                "The descriptor, '{}', does not exist on type, '{}'",
+                descriptor,
+                owner.__qualname__))
+    return name
 
 
 def _first(iter):

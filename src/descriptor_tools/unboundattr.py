@@ -1,5 +1,6 @@
 # coding=utf-8
 from descriptor_tools import name_of
+from warnings import warn
 
 
 __all__ = ['UnboundAttribute']
@@ -10,6 +11,25 @@ DEFAULT = object()
 
 class UnboundAttribute:
     """
+    -----------------
+
+    Warning: :UnboundAttribute is a subpar method for implementing unbound
+    attributes. It's not what the user expects, creates an extra object when
+    one isn't needed, and is verbose in its usuage.
+
+    It is generally recommended that you instead return the descriptor (since
+    that's what most people expect anyway) and make the descriptor callable
+    with the following implementation:
+
+        def __call__(self, instance):
+            return self.__get__(instance)
+
+    You could also have it pass in `type(instance)` as the second argument, but
+    it's better to have `__get__()` give a default of `None` to the `owner`
+    argument, unless you need it for instance-based calls.
+
+    -----------------
+
     An UnboundAttribute is a similar concept to an unbound method. An unbound
     attribute is a callable that only needs an instance from which to pull
     the value from. They are generally produced by "binding" descriptors,
@@ -56,6 +76,7 @@ class UnboundAttribute:
         :param owner: used for descriptor __get__() call and string
         representations
         """
+        warn(Warning("UnboundAttribute is a subpar method of doing unbound attributes. See doc of UnboundAttribute for more details."))
         self.descriptor = descriptor
         self.owner = owner
 
@@ -124,7 +145,3 @@ class UnboundAttribute:
         ownerrep = repr(self.owner)
         return "{cls}({desc}, {owner})".format(cls=selfname, desc=descrep,
                                                owner=ownerrep)
-
-
-# TODO attempt a more universal UnboundAttribute implementation - one that
-#  can be used without the need for descriptors.

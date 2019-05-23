@@ -76,7 +76,6 @@ from descriptor_tools.find_descriptors import (get_descriptor_from,
                                                get_descriptor)
 from descriptor_tools.names import (name_of,
                                     id_name_of)
-from descriptor_tools.unboundattr import UnboundAttribute
 from descriptor_tools.properties import (BindingProperty,
                                          LazyProperty,
                                          withConstants)
@@ -103,8 +102,4 @@ __all__ = ['AttributeSetter',
            'set_on',
            'setattribute',
            'Setter',
-           'UnboundAttribute',
-           'withConstants',
-           'forced',
-           'set_once',
-           'is_data_desc']
+           'withConstants']

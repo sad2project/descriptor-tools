@@ -2,11 +2,12 @@ from unittest import TestCase
 from descriptor_tools.instance_properties.built_ins import (
                                                     Lazy,
                                                     LateInit,
-                                                    ReadOnlyLateInit,
                                                     ByMap,
                                                     no_value,)
 
 init_value = -256
+
+# TODO: Tests for Validating
 
 
 class LazyTest(TestCase):
@@ -58,32 +59,23 @@ class LazyTest(TestCase):
 
 class LateInitTest(TestCase):
     def test_given_uninitialized_then_value_is_no_value(self):
-        sut = LateInit(name="name")
+        sut = LateInit()
 
         self.assertIs(sut.value, no_value)
 
     def test_given_unitialized_when_calling_get_then_raises_exception(self):
-        sut = LateInit(name="name")
+        sut = LateInit()
 
         with self.assertRaises(AttributeError):
             sut.get()
 
     def test_given_initialized_when_calling_get_then_returns_set_value(self):
-        sut = LateInit(name="name")
+        sut = LateInit()
         sut.set(init_value)
 
         result = sut.get()
 
         self.assertEqual(result, init_value)
-
-
-class ReadOnlyLateInitTest(TestCase):
-    def test_cannot_set_twice(self):
-        sut = ReadOnlyLateInit(name="name")
-        sut.set(init_value)
-
-        with self.assertRaises(AttributeError):
-            sut.set(init_value)
 
 
 class ByMapTest(TestCase):

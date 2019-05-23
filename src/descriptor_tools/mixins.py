@@ -17,7 +17,7 @@ See each namespace for more about how they're implemented and how to implement
 them.
 """
 
-from descriptor_tools import DescDict, UnboundAttribute, NameMangler, name_of, \
+from descriptor_tools import DescDict, NameMangler, name_of, \
     id_name_of
 
 
@@ -36,9 +36,12 @@ class Getters:
         UnboundAttribute when instance is None. Otherwise, it redirects as
         specified in the Getters documentation.
         """
-        def __get__(self, instance, owner):
+        def __call__(self, instance):
+            return self.__get__(instance)
+
+        def __get__(self, instance, owner=None):
             if instance is None:
-                return UnboundAttribute(self, owner)
+                return self
             else:
                 return self._get(instance)
 

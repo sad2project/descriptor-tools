@@ -1,7 +1,6 @@
 # coding=utf-8
 from unittest import TestCase
 
-from descriptor_tools import UnboundAttribute
 from descriptor_tools.properties import (LazyProperty,
                                              BindingProperty,
                                              withConstants)
@@ -91,7 +90,7 @@ class BindingProperty_Test(TestCase):
 
         self.assertEqual(instance.attr, 5)
 
-        self.assertIsInstance(self.Class.attr, UnboundAttribute)
+        self.assertIsInstance(self.Class.attr, BindingProperty)
 
         self.assertEqual(self.Class.attr(instance), 5)
 

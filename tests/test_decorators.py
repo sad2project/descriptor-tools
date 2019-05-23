@@ -2,7 +2,6 @@
 from unittest import TestCase
 
 import test_mocks as mocks
-from descriptor_tools import UnboundAttribute
 from descriptor_tools.decorators import (DescriptorDecoratorBase,
                                          _lifted_desc_results,
                                          is_data_desc,
@@ -30,7 +29,7 @@ class Lifted_Desc_Results_Test(TestCase):
 
         result = _lifted_desc_results(wrapped, wrapper, None, object)
 
-        self.assertIs(result.descriptor, wrapper)
+        self.assertIs(result, wrapper)
 
     def test_other(self):
         wrapped = mocks.Descriptor()
@@ -202,16 +201,19 @@ class DescriptorDecorator_WrappingABindingDescriptor(TestCase):
     def setUp(self):
         self.decor = DescriptorDecoratorBase(Binding(mocks.Descriptor()))
         self.Class = type(mocks.ClassWithDescriptor(self.decor))
+        self.instance = self.Class()
+        self.instance.attr = 5
 
-    def test_get_from_class_returns_UnboundAttribute(self):
-        result = self.decor.__get__(None, self.Class)
+    def test_get_from_class_returns_descriptor(self):
+        result = self.Class.attr
 
-        self.assertIsInstance(result, UnboundAttribute)
+        self.assertIs(result, self.decor)
 
-    def test_UnboundAttribute_lifts_descriptor(self):
-        result = self.decor.__get__(None, self.Class)
+    def test_unbound_use(self):
+        unbound = self.Class.attr
+        result = unbound(self.instance)
 
-        self.assertIs(result.descriptor, self.decor)
+        self.assertEqual(5, result)
 
 
 class Binding_Test(TestCase):
@@ -222,20 +224,22 @@ class Binding_Test(TestCase):
 
         self.instance.attr = 5
 
-    def test_class_get_is_UnboundAttribute(self):
+    def test_class_get_is_Binding(self):
         result = self.Class.attr
 
-        self.assertIsInstance(result, UnboundAttribute)
-
-    def test_class_get_lifts_UnboundAttribute_descriptor(self):
-        result = self.Class.attr
-
-        self.assertIs(self.decor, result.descriptor)
+        self.assertIsInstance(result, Binding)
+        self.assertIs(result, self.decor)
 
     def test_instance_get_is_attribute(self):
         result = self.instance.attr
 
         self.assertEqual(result, 5)
+
+    def test_unbound_usage(self):
+        unbound = self.Class.attr
+        result = unbound(self.instance)
+
+        self.assertEqual(5, result)
 
 
 class SecretSet_Test(TestCase):
@@ -298,35 +302,28 @@ class SetOnce_Test(TestCase):
 
 
 class Binder:
-    def __init__(self):
-        self.get_called = False
+    def __init__(self, value):
+        self.value = value
 
     @binding
     def __get__(self, instance, owner):
-        self.get_called = True
-        return instance
+        return self.value
 
 
 class BindingMethod_Test(TestCase):
     class Class:
-        attr = Binder()
+        attr = Binder(5)
 
-    def test_get_by_class_retrieves_UnboundAttribute(self):
+    def test_regular_use(self):
         result = self.Class.attr
-
-        self.assertIsInstance(result, UnboundAttribute)
-
-    def test_get_by_class_doesnt_redirect(self):
-        result = self.Class.attr
-
-        self.assertFalse(result.descriptor.get_called)
-
-    def test_get_by_instance_redirects(self):
         instance = self.Class()
 
-        instance.attr
+        self.assertEqual(5, result(instance))
 
-        self.assertTrue(self.Class.attr.get_called)
+    def test_unbound_use(self):
+        result = self.Class().attr
+
+        self.assertEqual(5, result)
 
 
 class Forceful:

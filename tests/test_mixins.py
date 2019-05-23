@@ -2,7 +2,7 @@
 from unittest import TestCase
 
 import test_mocks as mocks
-from descriptor_tools import UnboundAttribute, DescDict, id_name_of
+from descriptor_tools import DescDict, id_name_of
 from descriptor_tools.mixins import (Getters,
                                      Storage,
                                      Setters)
@@ -21,24 +21,19 @@ class Getter_Binding_Test(TestCase):
         self.instance = mocks.ClassWithDescriptor(self.desc)
         self.Class = type(self.instance)
 
-    def test_get_from_class_is_UnboundAttribute(self):
-        result = self.desc.__get__(None, self.Class)
+    def test_get_from_class_is_unbound_descriptor(self):
+        result = self.Class.attr
 
-        self.assertIsInstance(result, UnboundAttribute)
+        self.assertIsInstance(result, self.Desc)
 
     def test_get_from_class_has_correct_descriptor(self):
-        result = self.desc.__get__(None, self.Class)
+        result = self.Class.attr
 
-        self.assertIs(result.descriptor, self.desc)
-
-    def test_get_from_class_has_correct_owner(self):
-        result = self.desc.__get__(None, self.Class)
-
-        self.assertIs(result.owner, self.Class)
+        self.assertIs(result, self.desc)
 
     def test_get_from_instance(self):
         self.desc.storage[self.instance] = 5
-        result = self.desc.__get__(self.instance, self.Class)
+        result = self.instance.attr
 
         self.assertEqual(result, 5)
 

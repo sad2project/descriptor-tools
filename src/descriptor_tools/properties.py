@@ -87,9 +87,8 @@ class BindingProperty(property):
     `BindingProperty` is exactly like `property` except that it 
     provides bound attributes.
     """
-    @binding
-    def __get__(self, instance, owner):
-        return super().__get__(instance, owner)
+    def __call__(self, instance):
+        return self.__get__(instance)
 
 
 class Constant:
