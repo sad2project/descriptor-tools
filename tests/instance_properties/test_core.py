@@ -6,7 +6,7 @@ from descriptor_tools.instance_properties import (
 
 
 class MockDelegatedProperty:
-    def __init__(self, value, **kwargs):
+    def __init__(self, value):
         self.value = value
         self.get_called = False
         self.set_called = False
@@ -25,132 +25,70 @@ class MockDelegatedProperty:
 
 class InstancePropertyTest(TestCase):
     class Class:
-        attr = InstanceProperty(e)
+        attr = InstanceProperty()
 
-    # TODO: Try again
-    # def test_given_unitialized_instance_when_calling__get__then_initializer_returned(self):
-    #     instance = self.Class()
-    #
-    #     initializer = instance.attr
-    #
-    #     self.assertIsInstance(initializer, InstancePropertyInitializer)
-    #
-    # def test_given_initialized_instance_when_calling__get__then_gets_attribute_from_delegated_property(self):
-    #     instance = self.Class()
-    #     init_value = 1
-    #     instance.attr.initialize(init_value)
-    #
-    #     instance.attr
-    #
-    #     self.assertTrue(
-    #             instance._attr.get_called,
-    #             "value not taken from delegated property")
-    #
-    # def test_given_initialized_instance_when_calling__get__then_returns_delegate_value(self):
-    #     instance = self.Class()
-    #     init_value = 1
-    #     instance.attr.initialize(init_value)
-    #
-    #     end_value = instance.attr
-    #
-    #     self.assertEqual(end_value, init_value)
-    #
-    # def test_given_uninitialized_instance_when_calling__set__then_raise_exception(self):
-    #     instance = self.Class()
-    #
-    #     with self.assertRaises(AttributeError):
-    #         instance.attr = 1
-    #
-    # def test_given_initialized_instance_when_calling__set__then_set_on_delegate(self):
-    #     instance = self.Class()
-    #     instance.attr.initialize(1)
-    #
-    #     instance.attr = 1
-    #
-    #     self.assertTrue(
-    #             instance._attr.set_called,
-    #             "set not called on delegated property")
-    #
-    # def test_given_initialized_readonly_delegate_when_calling__set__then_raise_exception(self):
-    #     class ReadOnlyDelegatedProperty:
-    #         def __init__(self, *args, **kwargs): pass
-    #         def get(self): pass
-    #
-    #     class Class:
-    #         attr = InstanceProperty(ReadOnlyDelegatedProperty)
-    #
-    #     instance = Class()
-    #     instance.attr.initialize(1)
-    #
-    #     try:
-    #         instance.attr = 1
-    #         self.fail()
-    #     except AttributeError as e:
-    #         self.assertIn("Cannot set new value on read-only attribute, 'attr'", str(e))
+    def test_when_uninitialized_instance_when_calling_get_then_fails(self):
+        instance = self.Class()
 
+        with self.assertRaises(AttributeError):
+            _ = instance.attr
 
-class OnDescriptorInstancePropertyTest(TestCase):
-    class Class: pass
-    # TODO: Try again
+    def test_given_initialized_instance_when_calling_get_then_gets_value(self):
+        instance = self.Class()
+        instance.attr = MockDelegatedProperty(5)
 
-    #     attr = by_ondesc(MockDelegatedProperty)
-    #
-    # def test_given_unitialized_instance_when_calling__get__then_initializer_returned(self):
-    #     instance = self.Class()
-    #
-    #     initializer = instance.attr
-    #
-    #     self.assertIsInstance(initializer, InstancePropertyInitializer)
-    #
-    # def test_given_initialized_instance_when_calling__get___then_gets_attribute_from_delegated_property(self):
-    #     instance = self.Class()
-    #     init_value = 1
-    #     instance.attr.initialize(init_value)
-    #
-    #     instance.attr
-    #
-    #     self.assertTrue(
-    #         self.Class.attr._delegate_storage.storage[instance].get_called,
-    #         "value not taken from delegated property")
-    #
-    # def test_given_initialized_instance_when_calling__get__then_returns_delegate_value(self):
-    #     instance = self.Class()
-    #     init_value = 1
-    #     instance.attr.initialize(init_value)
-    #
-    #     end_value = instance.attr
-    #
-    #     self.assertEqual(end_value, init_value)
-    #
-    # def test_given_unitialized_instance_when_calling__set__then_raise_exception(self):
-    #     instance = self.Class()
-    #
-    #     with self.assertRaises(AttributeError):
-    #         instance.attr = 1
-    #
-    # def test_given_initialized_instance_when_calling__set__then_set_on_delegate(self):
-    #     instance = self.Class()
-    #     instance.attr.initialize(1)
-    #
-    #     instance.attr = 1
-    #
-    #     self.assertTrue(
-    #         self.Class.attr._delegate_storage.storage[instance].set_called,
-    #         "set not called on delegated property")
-    #
-    # def test_given_initialized_readonly_delegate_when_calling__set__then_raise_exception(self):
-    #     class ReadOnlyDelegatedProperty:
-    #         def __init__(self, *args, **kwargs): pass
-    #         def get(self): pass
-    #
-    #     class Class:
-    #         attr = by_ondesc(ReadOnlyDelegatedProperty)
-    #
-    #     instance = Class()
-    #     instance.attr.initialize(1)
-    #
-    #     try:
-    #         instance.attr = 1
-    #         self.fail()
-    #     except AttributeError as e:
-    #         self.assertIn("Cannot set new value on read-only attribute, 'attr'", str(e))
+        result = instance.attr
+
+        self.assertEqual(5, result)
+
+    def test_given_initialized_instance_when_calling_get_then_gets_value_from_delegated_property(self):
+        instance = self.Class()
+        instance.attr = MockDelegatedProperty(5)
+
+        _ = instance.attr
+        delegprop = instance._attr
+
+        self.assertTrue(delegprop.get_called)
+
+    def test_given_uninitialized_instance_when_setting_a_non_delegate_then_raise_exception(self):
+        instance = self.Class()
+
+        with self.assertRaises(AttributeError):
+            instance.attr = 5
+
+    def test_given_initialized_instance_when_calling__set__then_set_on_delegate(self):
+        instance = self.Class()
+        instance.attr = MockDelegatedProperty(1)
+
+        instance.attr = 5
+
+        self.assertTrue(
+                instance._attr.set_called,
+                "set not called on delegated property")
+
+    def test_given_initialized_instance_when_calling__set__then_set_value(self):
+        instance = self.Class()
+        instance.attr = MockDelegatedProperty(1)
+
+        instance.attr = 5
+
+        self.assertEqual(5, instance.attr)
+
+    def test_given_nondeletable_instance_property_when_delete_then_raise_error(self):
+        instance = self.Class()
+        instance.attr = MockDelegatedProperty(5)
+
+        with self.assertRaises(AttributeError):
+            del instance.attr
+
+    def test_given_initialized_readonly_delegate_when_calling__set__then_raise_exception(self):
+        class ReadOnlyAttrClass:
+            attr = InstanceProperty(readonly=True)
+
+            def __init__(self):
+                self.attr = MockDelegatedProperty(5)
+
+        instance = ReadOnlyAttrClass()
+
+        with self.assertRaises(AttributeError):
+            instance.attr = 1

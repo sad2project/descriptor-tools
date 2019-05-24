@@ -137,7 +137,7 @@ class InstanceProperty:
     def _meta(self, instance):
         return (
             instance,
-            self._delegate_storage.name(instance))
+            self._delegate_storage.base_name)
 
     def __get_delegate(self, instance):
         return self._delegate_storage.get(instance)
