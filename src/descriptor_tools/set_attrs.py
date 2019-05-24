@@ -3,6 +3,9 @@ import functools
 from . import get_descriptor_from
 
 
+__author__ = 'Jake'
+
+
 # --------------------------------
 # functions for descriptors to use
 # --------------------------------

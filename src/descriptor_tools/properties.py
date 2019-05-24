@@ -3,6 +3,7 @@ from descriptor_tools import name_of
 
 from descriptor_tools.decorators import binding
 
+__author__ = 'Jake'
 __all__ = ['LazyProperty', 'BindingProperty', 'withConstants']
 
 
@@ -122,6 +123,7 @@ class Constant:
 
     def __str__(self):
         return "CONSTANT:" + str(self.value)
+
 
 def withConstants(**kwargs):
   """

@@ -3,6 +3,7 @@ from descriptor_tools import name_of
 from warnings import warn
 
 
+__author__ = 'Jake'
 __all__ = ['UnboundAttribute']
 
 

@@ -9,8 +9,6 @@ from descriptor_tools.instance_properties.built_ins import (
 
 init_value = -256
 
-# TODO: Tests for Validating
-
 
 class LazyTest(TestCase):
     @staticmethod

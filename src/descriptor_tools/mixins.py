@@ -21,6 +21,9 @@ from descriptor_tools import DescDict, NameMangler, name_of, \
     id_name_of
 
 
+__author__ = 'Jake'
+
+
 class Getters:
     """
     The `Getters` classes are mix-ins for descriptors that allow the creator

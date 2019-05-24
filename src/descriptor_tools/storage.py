@@ -4,6 +4,9 @@ from . import name_of, DescDict, id_name_of
 from .decorators import binding
 
 
+__author__ = 'Jake'
+# TODO: Test and document
+
 class DictStorage:
     def __init__(self):
         self.base_name = None
@@ -21,8 +24,8 @@ class DictStorage:
         try:
             return self.store[instance]
         except KeyError:
-            raise AttributeError(self.name(instance, desc))
-            # TODO: fill out the error message better
+            raise AttributeError(
+                str.format("Attribute '{}' on object {} is not initialized", self.base_name, instance))
 
     def set(self, instance, value):
         self.store[instance] = value
@@ -68,7 +71,6 @@ class InstanceStorage:
         except KeyError:
             raise AttributeError(
                 str.format("Attribute '{}' on object {} is not initialized", self.base_name, instance))
-            # TODO: fill out the error message better
 
     def set(self, instance, value):
         vars(instance)[self.name(instance)] = value

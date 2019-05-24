@@ -2,6 +2,10 @@
 from descriptor_tools import get_descriptor
 
 
+__author__ = 'Jake'
+__all__ = ['name_of', 'id_name_of']
+
+
 def name_of(descriptor, owner):
     """
     Given a descriptor and a class that the descriptor is stored on, returns

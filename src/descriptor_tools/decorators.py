@@ -37,7 +37,7 @@ from descriptor_tools import name_of, DescDict
 from functools import wraps
 from operator import attrgetter
 
-
+__author__ = 'Jake'
 __all__ = ["DescriptorDecoratorBase",
            "Binding",
            "binding",

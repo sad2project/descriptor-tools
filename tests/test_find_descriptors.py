@@ -4,7 +4,6 @@ from unittest import TestCase
 import test_mocks as mocks
 from descriptor_tools import get_descriptor_from, get_descriptor, name_of
 from descriptor_tools.decorators import Binding
-from descriptor_tools.find_descriptors import _find_descriptor
 
 attrname = mocks.attrname
 
@@ -60,30 +59,6 @@ class Get_Descriptor_From_Test(TestCase):
         result = get_descriptor_from(SubClass(), Class.attrname)
 
         self.assertIs(result, Class.__dict__[Class.attrname])
-
-
-class _FindDescriptor_Test(TestCase):
-    def test_with_normal_descriptor(self):
-        cls = type(mocks.ClassWithDescriptor(mocks.Descriptor()))
-
-        result = _find_descriptor(cls, attrname)
-
-        self.assertIs(result, cls.__dict__[attrname])
-
-    def test_with_binding_descriptor(self):
-        cls = type(mocks.ClassWithDescriptor(Binding(mocks.Descriptor())))
-
-        result = _find_descriptor(cls, attrname)
-
-        self.assertIs(result, cls.__dict__[attrname])
-
-    def test_with_superclass(self):
-        result = _find_descriptor(SubClass, Class.attrname)
-
-        self.assertIs(result, Class.__dict__[Class.attrname])
-
-
-
 
 
 class Name_Of_Test(TestCase):
