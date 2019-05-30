@@ -91,8 +91,8 @@ class InstanceProperty:
             name of the descriptor's attribute, but with an '_' prefix.
             e.g. 'attr' becomes '_attr'
         """
-        self._delegate_storage = _default_of(storage, _default_storage)
-        self._delegate_storage.desc = self
+        self._delegates = _default_of(storage, _default_storage)
+        self._delegates.desc = self
 
         self.readonly = readonly
         self.deletable = deletable
@@ -101,46 +101,43 @@ class InstanceProperty:
         return self.__get__(instance)
 
     def __set_name__(self, owner, name):
-        self._delegate_storage.set_name(name)
+        self._delegates.set_name(name)
 
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
         else:
-            return self.__get_delegate(instance).get()
+            return self._delegates[instance].get()
 
     def __set__(self, instance, value):
         # uninitialized case - value is the delegate
-        if instance not in self._delegate_storage:
+        if instance not in self._delegates:
             value.set_meta(*self._meta(instance))
-            self._delegate_storage.set(instance, value)
+            self._delegates[instance] = value
         # initialized and read-only case
         elif self.readonly:
-            name = self._delegate_storage.base_name
+            name = self._delegates.base_name
             message = "You cannot change attribute '{}' on object {} because it is read-only"
             raise AttributeError(
                 message.format(name, instance)
             )
         # initialized and writeable case - value is the property value
         else:
-            self.__get_delegate(instance).set(value)
+            self._delegates[instance].set(value)
 
     def __delete__(self, instance):
         if not self.deletable:
-            name = self._delegate_storage.base_name
+            name = self._delegates.base_name
             raise AttributeError(
                 "Attribute '{}' on object {} cannot be deleted".format(
                     name,
                     instance))
-        self._delegate_storage.delete(instance)
+        del self._delegates[instance]
 
     def _meta(self, instance):
         return (
             instance,
-            self._delegate_storage.base_name)
-
-    def __get_delegate(self, instance):
-        return self._delegate_storage.get(instance)
+            self._delegates.base_name)
 
 
 class DelegatedProperty(metaclass=ABCMeta):

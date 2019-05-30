@@ -1,8 +1,8 @@
-[![Python](https://img.shields.io/badge/Python-3.x-brightgreen.svg)](https://www.python.org/)
-[![Edition](https://img.shields.io/badge/Edition-1.1-AA3333.svg)](http://amzn.to/2sd2Ubt)
+[![Python](https://img.shields.io/badge/Python-3.3+-brightgreen.svg)](https://www.python.org/)
+[![Edition](https://img.shields.io/badge/Edition-2-AA3333.svg)](http://amzn.to/2sd2Ubt)
 ![Version](https://img.shields.io/badge/Version-1.1beta-992222.svg)
 # descriptor-tools
-A collection of classes and functions to make the creation of descriptors simpler and quicker. Most of the ideas present in this library were presented, but not fully fleshed out in my book, *[Python Descriptors](http://amzn.to/2sd2Ubt)*.
+A collection of classes and functions to make the creation of descriptors simpler and quicker. Most of the ideas present in this library were presented, but not fully fleshed out in my book, *[Python Descriptors](https://amzn.to/2HAL6gE)* (2nd Edition).
 
 The first major contribution that this library provides is attribute binding (see below), along with many helpers for building descriptors that use it.
 

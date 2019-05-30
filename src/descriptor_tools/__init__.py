@@ -76,6 +76,7 @@ from descriptor_tools.find_descriptors import *
 from descriptor_tools.names import *
 from descriptor_tools.properties import *
 from descriptor_tools.set_attrs import *
+from descriptor_tools.storage import *
 from descriptor_tools.unboundattr import *
 
 # does not automatically export the decorators or mixins modules
