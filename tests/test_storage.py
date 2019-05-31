@@ -1,11 +1,12 @@
 from unittest import TestCase
 
 from descriptor_tools.storage import *
+from descriptor_tools import id_name_of
 
 
-class DictStorageDescriptor:
-    def __init__(self):
-        self.storage = DictStorage()
+class StorageUsingDescriptor:
+    def __init__(self, storage):
+        self.storage = storage
         self.storage.desc = self
 
     def __set_name__(self, owner, name):
@@ -25,7 +26,7 @@ class DictStorageDescriptor:
 
 
 class DictSutClass:
-    attr = DictStorageDescriptor()
+    attr = StorageUsingDescriptor(DictStorage())
 
     def __init__(self):
         self.attr = 5
@@ -64,29 +65,8 @@ class DictStorage_Test(TestCase):
             _ = self.instance.attr
 
 
-class InstStorageDescriptor:
-    def __init__(self):
-        self.storage = InstanceStorage()
-        self.storage.desc = self
-
-    def __set_name__(self, owner, name):
-        self.storage.set_name(name)
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        else:
-            return self.storage[instance]
-
-    def __set__(self, instance, value):
-        self.storage[instance] = value
-
-    def __delete__(self, instance):
-        del self.storage[instance]
-
-
 class InstSutClass:
-    attr = InstStorageDescriptor()
+    attr = StorageUsingDescriptor(InstanceStorage())
 
     def __init__(self):
         self.attr = 5
