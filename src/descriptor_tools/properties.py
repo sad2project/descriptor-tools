@@ -37,6 +37,10 @@ class LazyProperty:
     there's no reason to calculate and store those values until/unless you 
     need them. `LazyProperty` allows those values to remain uncalculated
     until then.
+
+    `LazyProperty` also can work as an unbound property when accessed from the
+    class level, returning itself, which can be called with an instance to
+    provide the attribute value on that instance.
     
     Note: If you use a lambda as the function from which to calculate the
     lazy value, you must provide `named=False` as an argument to the
@@ -48,9 +52,14 @@ class LazyProperty:
             name = self.func.__name__
             self._name = lambda inst: name
 
-    def __get__(self, instance, owner):
+    def __call__(self, instance):
+        return self.__get__(instance)
+
+    def __get__(self, instance, owner=None):
         if instance is None:
             return self
+        if self._name(instance) in instance.__dict__:
+            return instance.__dict__[self._name(instance)]
         value = self.func(instance)
         instance.__dict__[self._name(instance)] = value
         return value
